@@ -1,3 +1,9 @@
+CREATE DATABASE MeuTraining;
+GO
+
+USE MeuTraining;
+GO
+
 CREATE TABLE product (
   id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
   code VARCHAR(9) UNIQUE NOT NULL,
@@ -7,6 +13,7 @@ CREATE TABLE product (
   type VARCHAR(21) NULL,
   description VARCHAR(180) NULL,
 );
+GO
 
 INSERT INTO product (code, name, category, brand, type, description) VALUES
 ('P001', 'MASK ADULT Surgical 3 ply 50''S MEDICOS with box', 'Health Accessories', 'Medicos', 'Hygiene', 'Colour: Blue (ear loop outside, ear loop inside- random assigned), Green, Purple, White, Lime Green, Yellow, Pink'),
