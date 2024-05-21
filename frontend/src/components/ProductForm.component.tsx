@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ICreateProduct } from "../types/product.tying";
 import {
   Button,
@@ -8,6 +8,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import ProductService from "../services/ProductServices";
+import { toast } from "react-toastify";
 
 interface IProductFormProps {
   handleClickCancelBtn: () => void;
@@ -43,7 +44,7 @@ const ProductForm = ({
         setProduct(data);
       } catch (error) {
         console.error("Error to fetch product data:", error);
-        alert("Error to fetch product data.");
+        toast.error("Error to fetch product data.");
       } finally {
       }
     }
@@ -66,13 +67,13 @@ const ProductForm = ({
     savePromise
       .then((newProduct) => {
         const newProductId = newProduct?.id || 0;
-        alert("Save successfully!");
+        toast.success("Save successfully!");
         handleClickCancelBtn();
         onSaveSuccess(newProductId);
       })
       .catch((error) => {
         console.log(error);
-        alert("An error occurred while saving!");
+        toast.error("An error occurred while saving!");
       })
       .finally(() => {
         setLoading(false);
@@ -154,7 +155,7 @@ const ProductForm = ({
               variant="contained"
               onClick={handleClickSaveBtn}
             >
-              Save
+              {isEditing ? "Update" : "Save"}
             </Button>
           </div>
         </Paper>

@@ -9,7 +9,7 @@ using backend.Models;
 
 namespace backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/products")]
     [ApiController]
     public class ProductsController : ControllerBase
     {
@@ -20,14 +20,14 @@ namespace backend.Controllers
             _context = context;
         }
 
-        // GET: api/Products
+        // GET: api/products
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
             return await _context.Products.ToListAsync();
         }
 
-        // GET: api/Products/id
+        // GET: api/products/id
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
@@ -41,7 +41,7 @@ namespace backend.Controllers
             return product;
         }
 
-        // POST: api/Products
+        // POST: api/products
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct(Product product)
         {
@@ -51,7 +51,7 @@ namespace backend.Controllers
             return CreatedAtAction("GetProduct", new { id = product.Id }, product);
         }
 
-        // PUT: api/Products/id
+        // PUT: api/products/id
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct(int id, Product product)
         {
@@ -81,7 +81,7 @@ namespace backend.Controllers
             return NoContent();
         }       
 
-        // DELETE: api/Products/id
+        // DELETE: api/products/id
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {

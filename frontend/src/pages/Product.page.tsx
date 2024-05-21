@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -6,6 +6,7 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
+import { toast } from "react-toastify";
 import { IProduct } from "../types/product.tying";
 import ProductGrid from "../components/ProductGrid.component";
 import ProductForm from "../components/ProductForm.component";
@@ -28,7 +29,7 @@ const Product = () => {
       setProducts(productData);
     } catch (error) {
       console.error("Error fetching products", error);
-      alert("Error fetching products");
+      toast.error("Error fetching products");
     } finally {
       setLoading(false);
     }

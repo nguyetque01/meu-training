@@ -1,7 +1,7 @@
 import httpModule from "../helpers/http.module";
 import { IProduct, ICreateProduct } from "../types/product.tying";
 
-const API_ENDPOINT = "/Products";
+const API_ENDPOINT = "/products";
 
 const ProductService = {
   getAllProducts: async (): Promise<IProduct[]> => {
