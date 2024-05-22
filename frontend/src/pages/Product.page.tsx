@@ -14,7 +14,7 @@ import ProductService from "../services/ProductService";
 
 const Product = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
-  const [productId, setProductId] = useState<number>(0);
+  const [productCode, setProductCode] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
@@ -48,18 +48,18 @@ const Product = () => {
   const closeForm = () => setIsFormOpen(false);
 
   const handleClickAddBtn = () => {
-    setProductId(0);
+    setProductCode("");
     setIsFormOpen((prev) => !prev);
   };
 
-  const handleClickEditBtn = (productId: number) => {
-    setProductId(productId);
+  const handleClickEditBtn = (productCode: string) => {
+    setProductCode(productCode);
     openForm();
   };
 
-  const handleSaveSuccess = async (newProductId: number) => {
-    if (productId === 0) {
-      setProductId(newProductId);
+  const handleSaveSuccess = async (newProductCode: string) => {
+    if (productCode === "") {
+      setProductCode(newProductCode);
     }
     fetchProducts();
   };
@@ -89,7 +89,7 @@ const Product = () => {
       >
         <Typography variant="h3" gutterBottom>
           {isFormOpen
-            ? productId === 0
+            ? productCode === ""
               ? "Create Products"
               : "Edit Products"
             : "Products"}
@@ -109,7 +109,7 @@ const Product = () => {
       ) : isFormOpen ? (
         <div className="form-content">
           <ProductForm
-            productId={productId}
+            productCode={productCode}
             onSaveSuccess={handleSaveSuccess}
             handleClickCancelBtn={handleClickCancelBtn}
           />

@@ -21,10 +21,10 @@ const ProductService = {
     }
   },
 
-  getProductById: async (productId: number): Promise<IProduct> => {
+  getProductByCode: async (code: string): Promise<IProduct> => {
     try {
       const response = await httpModule.get<IProduct>(
-        `${API_ENDPOINT}/${productId}`
+        `${API_ENDPOINT}/${code}`
       );
       return response.data;
     } catch (error) {
@@ -45,19 +45,19 @@ const ProductService = {
   },
 
   updateProduct: async (
-    productId: number,
+    code: string,
     productData: ICreateProduct
   ): Promise<void> => {
     try {
-      await httpModule.put(`${API_ENDPOINT}/${productId}`, productData);
+      await httpModule.put(`${API_ENDPOINT}/${code}`, productData);
     } catch (error) {
       throw new Error("Failed to update product");
     }
   },
 
-  deleteProduct: async (productId: number): Promise<void> => {
+  deleteProduct: async (code: string): Promise<void> => {
     try {
-      await httpModule.delete(`${API_ENDPOINT}/${productId}`);
+      await httpModule.delete(`${API_ENDPOINT}/${code}`);
     } catch (error) {
       throw new Error("Failed to delete product");
     }

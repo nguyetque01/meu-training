@@ -12,12 +12,12 @@ import { toast } from "react-toastify";
 
 interface IProductFormProps {
   handleClickCancelBtn: () => void;
-  onSaveSuccess: (newProduct: number) => void;
-  productId: number;
+  onSaveSuccess: (newProductCode: string) => void;
+  productCode: string;
 }
 
 const ProductForm = ({
-  productId,
+  productCode,
   onSaveSuccess,
   handleClickCancelBtn,
 }: IProductFormProps) => {
@@ -31,16 +31,16 @@ const ProductForm = ({
   });
 
   const [loading, setLoading] = useState(false);
-  const isEditing = productId !== 0;
+  const isEditing = productCode !== "";
 
   useEffect(() => {
     fetchProductData();
-  }, [productId]);
+  }, [productCode]);
 
   const fetchProductData = async () => {
     if (isEditing) {
       try {
-        const data = await ProductService.getProductById(productId);
+        const data = await ProductService.getProductByCode(productCode);
         setProduct(data);
       } catch (error) {
         console.error("Error to fetch product data:", error);
@@ -61,15 +61,15 @@ const ProductForm = ({
     setLoading(true);
 
     const savePromise = isEditing
-      ? ProductService.updateProduct(productId, product)
+      ? ProductService.updateProduct(productCode, product)
       : ProductService.createProduct(product);
 
     savePromise
       .then((newProduct) => {
-        const newProductId = newProduct?.id || 0;
+        const newProductCode = newProduct?.code || "";
         toast.success("Save successfully!");
         handleClickCancelBtn();
-        onSaveSuccess(newProductId);
+        onSaveSuccess(newProductCode);
       })
       .catch((error) => {
         console.log(error);
@@ -96,6 +96,7 @@ const ProductForm = ({
                 variant="outlined"
                 value={product.code}
                 onChange={(e) => handleInputChange("code", e.target.value)}
+                disabled={isEditing}
               />
             </Grid>
             <Grid item xs={12}>
