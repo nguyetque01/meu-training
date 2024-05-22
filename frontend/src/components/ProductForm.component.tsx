@@ -7,7 +7,7 @@ import {
   Grid,
   CircularProgress,
 } from "@mui/material";
-import ProductService from "../services/ProductServices";
+import ProductService from "../services/ProductService";
 import { toast } from "react-toastify";
 
 interface IProductFormProps {

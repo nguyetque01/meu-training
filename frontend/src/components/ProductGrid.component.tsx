@@ -1,57 +1,100 @@
-import { Box, Button } from "@mui/material";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import {
+  Box,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableFooter,
+  TableHead,
+  TablePagination,
+  TableRow,
+} from "@mui/material";
 import { IProduct } from "../types/product.tying";
 
-interface IProductGridProps {
+interface ProductGridProps {
   products: IProduct[];
+  page: number;
+  pageSize: number;
+  totalProducts: number;
   handleClickEditBtn: (id: number) => void;
+  onChangePage: (newPage: number) => void;
+  onChangePageSize: (newPageSize: number) => void;
 }
 
-const ProductGrid = ({ products, handleClickEditBtn }: IProductGridProps) => {
-  const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 50 },
-    { field: "code", headerName: "Code", width: 80 },
-    { field: "name", headerName: "Name", width: 250 },
-    { field: "category", headerName: "Category", width: 200 },
-    { field: "brand", headerName: "Brand", width: 100 },
-    { field: "type", headerName: "Type", width: 150 },
-    { field: "description", headerName: "Description", width: 250 },
-    {
-      field: "actions",
-      headerName: "Actions",
-      width: 100,
-      renderCell: (params) => (
-        <Button
-          aria-label="edit"
-          size="small"
-          color="secondary"
-          style={{ marginRight: 8 }}
-          onClick={() => handleClickEditBtn(params.row.id)}
-        >
-          Edit
-        </Button>
-      ),
-    },
-  ];
+const ProductGrid = ({
+  products,
+  page,
+  pageSize,
+  totalProducts,
+  handleClickEditBtn,
+  onChangePage,
+  onChangePageSize,
+}: ProductGridProps) => {
+  const handleChangePage = (event: unknown, newPage: number) => {
+    onChangePage(newPage + 1);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    onChangePageSize(parseInt(event.target.value, 10));
+    onChangePage(1);
+  };
 
   return (
     <Box className="grid" sx={{ p: 2 }}>
-      <DataGrid
-        rows={products}
-        columns={columns}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 10,
-            },
-          },
-        }}
-        pagination
-        pageSizeOptions={[10, 15, 20, 25]}
-        getRowId={(row) => row.id}
-        rowHeight={50}
-        disableRowSelectionOnClick
-      />
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>ID</TableCell>
+              <TableCell>Code</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Category</TableCell>
+              <TableCell>Brand</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {products?.map((product) => (
+              <TableRow key={product.id}>
+                <TableCell>{product.id}</TableCell>
+                <TableCell>{product.code}</TableCell>
+                <TableCell>{product.name}</TableCell>
+                <TableCell>{product.category}</TableCell>
+                <TableCell>{product.brand}</TableCell>
+                <TableCell>{product.type}</TableCell>
+                <TableCell>{product.description}</TableCell>
+                <TableCell>
+                  <Button
+                    aria-label="edit"
+                    size="small"
+                    color="secondary"
+                    onClick={() => handleClickEditBtn(product.id)}
+                  >
+                    Edit
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                count={totalProducts}
+                rowsPerPage={pageSize}
+                page={page - 1}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </TableContainer>
     </Box>
   );
 };

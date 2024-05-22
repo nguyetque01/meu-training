@@ -8,25 +8,33 @@ import {
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { IProduct } from "../types/product.tying";
-import ProductGrid from "../components/ProductGrid.component";
 import ProductForm from "../components/ProductForm.component";
-import ProductServices from "../services/ProductServices";
+import ProductGrid from "../components/ProductGrid.component";
+import ProductService from "../services/ProductService";
 
 const Product = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [productId, setProductId] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [totalProducts, setTotalProducts] = useState<number>(0);
 
   useEffect(() => {
-    fetchProduct();
-  }, []);
+    fetchProducts();
+  }, [page, pageSize]);
 
-  const fetchProduct = async () => {
+  const fetchProducts = async () => {
     try {
       setLoading(true);
-      const productData = await ProductServices.getAllProducts();
-      setProducts(productData);
+      const productData = await ProductService.getAllProducts(page, pageSize);
+      if (!productData || !productData.items) {
+        console.error("Product data or items is undefined");
+      } else {
+        setProducts(productData.items);
+        setTotalProducts(productData.totalCount);
+      }
     } catch (error) {
       console.error("Error fetching products", error);
       toast.error("Error fetching products");
@@ -53,11 +61,19 @@ const Product = () => {
     if (productId === 0) {
       setProductId(newProductId);
     }
-    fetchProduct();
+    fetchProducts();
   };
 
   const handleClickCancelBtn = () => {
     closeForm();
+  };
+
+  const handleChangePage = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangePageSize = (newPageSize: number) => {
+    setPageSize(newPageSize);
   };
 
   return (
@@ -86,7 +102,7 @@ const Product = () => {
         <Box sx={{ p: 2, textAlign: "center" }}>
           <CircularProgress size={100} />
         </Box>
-      ) : products.length === 0 ? (
+      ) : products?.length === 0 ? (
         <Box sx={{ p: 2, textAlign: "center" }}>
           <Typography variant="h5">Not found</Typography>
         </Box>
@@ -102,6 +118,11 @@ const Product = () => {
         <ProductGrid
           products={products}
           handleClickEditBtn={handleClickEditBtn}
+          page={page}
+          pageSize={pageSize}
+          totalProducts={totalProducts}
+          onChangePage={handleChangePage}
+          onChangePageSize={handleChangePageSize}
         />
       )}
     </Paper>

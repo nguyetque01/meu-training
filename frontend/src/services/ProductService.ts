@@ -4,9 +4,17 @@ import { IProduct, ICreateProduct } from "../types/product.tying";
 const API_ENDPOINT = "/products";
 
 const ProductService = {
-  getAllProducts: async (): Promise<IProduct[]> => {
+  getAllProducts: async (
+    page: number = 1,
+    size: number = 10,
+    sort: string = "id",
+    dir: string = "asc"
+  ): Promise<{ items: IProduct[]; totalCount: number }> => {
     try {
-      const response = await httpModule.get<IProduct[]>(API_ENDPOINT);
+      const response = await httpModule.get<{
+        items: IProduct[];
+        totalCount: number;
+      }>(`${API_ENDPOINT}?page=${page}&size=${size}&sort=${sort}&dir=${dir}`);
       return response.data;
     } catch (error) {
       throw new Error("Failed to fetch products");

@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using backend.Models;
+using System.Drawing;
+using System.Linq.Dynamic.Core;
 
 namespace backend.Controllers
 {
@@ -21,11 +23,41 @@ namespace backend.Controllers
         }
 
         // GET: api/products
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        //{
+        //    return await _context.Products.ToListAsync();
+        //}
+
+        // GET: /api/products?page=1&size=5&sort=name&dir=desc
+    
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        public async Task<ActionResult<IEnumerable<Product>>> GetProducts(
+            [FromQuery] int page = 1,
+            [FromQuery] int size = 5,
+            [FromQuery] string sort = "id",
+            [FromQuery] string dir = "asc")
         {
-            return await _context.Products.ToListAsync();
+            if (page <= 0) page = 1;
+            if (size <= 0) size = 5;
+
+            // List of valid sortable fields
+            var sortableFields = new List<string> { "id", "code", "name", "category", "brand", "type", "description" };
+            if (!sortableFields.Contains(sort.ToLower())) sort = "id";
+            if (dir.ToLower() != "desc" && dir.ToLower() != "asc") dir = "asc";
+
+            string orderBy = $"{sort} {dir}";
+
+            IQueryable<Product> query = _context.Products.OrderBy(orderBy);
+
+            var totalItems = await query.CountAsync();
+            var pagedResult = await query.Skip((page - 1) * size).Take(size).ToListAsync();
+
+            return Ok(new { items = pagedResult, totalCount = totalItems });
         }
+
+
 
         // GET: api/products/id
         [HttpGet("{id}")]
