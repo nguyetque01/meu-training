@@ -21,6 +21,7 @@ namespace backend.Controllers
             _context = context;
         }
 
+        // GET: /api/products?page=1&size=5&sort=id&dir=asc
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts(
             [FromQuery] int page = 1,
@@ -45,6 +46,7 @@ namespace backend.Controllers
             return Ok(new { items = pagedResult, totalCount = totalItems });
         }
 
+        // GET: api/products/code
         [HttpGet("{code}")]
         public async Task<ActionResult<Product>> GetProduct(string code)
         {
@@ -56,6 +58,7 @@ namespace backend.Controllers
             return product;
         }
 
+        // POST: api/products
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct(Product product)
         {
@@ -65,6 +68,7 @@ namespace backend.Controllers
             return CreatedAtAction(nameof(GetProduct), new { code = product.Code }, product);
         }
 
+        // PUT: api/products/code
         [HttpPut("{code}")]
         public async Task<IActionResult> PutProduct(string code, Product product)
         {
@@ -94,6 +98,7 @@ namespace backend.Controllers
             return Ok("Product updated successfully.");
         }
 
+        // DELETE: api/products/code
         [HttpDelete("{code}")]
         public async Task<IActionResult> DeleteProduct(string code)
         {
