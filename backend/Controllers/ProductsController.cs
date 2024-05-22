@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using backend.Models;
 using System.Drawing;
 using System.Linq.Dynamic.Core;
-
 namespace backend.Controllers
 {
     [Route("api/products")]
@@ -22,16 +21,6 @@ namespace backend.Controllers
             _context = context;
         }
 
-        // GET: api/products
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
-        //{
-        //    return await _context.Products.ToListAsync();
-        //}
-
-        // GET: /api/products?page=1&size=5&sort=name&dir=desc
-    
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts(
             [FromQuery] int page = 1,
@@ -42,7 +31,6 @@ namespace backend.Controllers
             if (page <= 0) page = 1;
             if (size <= 0) size = 5;
 
-            // List of valid sortable fields
             var sortableFields = new List<string> { "id", "code", "name", "category", "brand", "type", "description" };
             if (!sortableFields.Contains(sort.ToLower())) sort = "id";
             if (dir.ToLower() != "desc" && dir.ToLower() != "asc") dir = "asc";
@@ -57,39 +45,32 @@ namespace backend.Controllers
             return Ok(new { items = pagedResult, totalCount = totalItems });
         }
 
-
-
-        // GET: api/products/id
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(int id)
+        [HttpGet("{code}")]
+        public async Task<ActionResult<Product>> GetProduct(string code)
         {
-            var product = await _context.Products.FindAsync(id);
-
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.Code == code);
             if (product == null)
             {
                 return NotFound();
             }
-
             return product;
         }
 
-        // POST: api/products
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct(Product product)
         {
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetProduct", new { id = product.Id }, product);
+            return CreatedAtAction(nameof(GetProduct), new { code = product.Code }, product);
         }
 
-        // PUT: api/products/id
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(int id, Product product)
+        [HttpPut("{code}")]
+        public async Task<IActionResult> PutProduct(string code, Product product)
         {
-            if (id != product.Id)
+            if (code != product.Code)
             {
-                return BadRequest();
+                return BadRequest("Product code mismatch.");
             }
 
             _context.Entry(product).State = EntityState.Modified;
@@ -100,7 +81,7 @@ namespace backend.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ProductExists(id))
+                if (!ProductExists(code))
                 {
                     return NotFound();
                 }
@@ -110,14 +91,13 @@ namespace backend.Controllers
                 }
             }
 
-            return NoContent();
-        }       
+            return Ok("Product updated successfully.");
+        }
 
-        // DELETE: api/products/id
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(int id)
+        [HttpDelete("{code}")]
+        public async Task<IActionResult> DeleteProduct(string code)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.Code == code);
             if (product == null)
             {
                 return NotFound();
@@ -126,12 +106,12 @@ namespace backend.Controllers
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok("Product deleted successfully.");
         }
 
-        private bool ProductExists(int id)
+        private bool ProductExists(string code)
         {
-            return _context.Products.Any(e => e.Id == id);
+            return _context.Products.Any(e => e.Code == code);
         }
     }
 }

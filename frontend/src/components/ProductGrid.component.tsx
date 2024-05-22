@@ -17,7 +17,7 @@ interface ProductGridProps {
   page: number;
   pageSize: number;
   totalProducts: number;
-  handleClickEditBtn: (id: number) => void;
+  handleClickEditBtn: (code: string) => void;
   onChangePage: (newPage: number) => void;
   onChangePageSize: (newPageSize: number) => void;
 }
@@ -73,7 +73,7 @@ const ProductGrid = ({
                     aria-label="edit"
                     size="small"
                     color="secondary"
-                    onClick={() => handleClickEditBtn(product.id)}
+                    onClick={() => handleClickEditBtn(product.code)}
                   >
                     Edit
                   </Button>
