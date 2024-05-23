@@ -21,102 +21,145 @@ namespace backend.Controllers
             _context = context;
         }
 
+        private ObjectResult CreateResponse(string message, object data, string status)
+        {
+            return new ObjectResult(new
+            {
+                message = message,
+                responseData = data,
+                status = status,
+                timeStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+            });
+        }
+
         // GET: /api/products?page=1&size=5&sort=id&dir=asc
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts(
+        public async Task<IActionResult> GetProducts(
             [FromQuery] int page = 1,
             [FromQuery] int size = 5,
             [FromQuery] string sort = "id",
             [FromQuery] string dir = "asc")
         {
-            if (page <= 0) page = 1;
-            if (size <= 0) size = 5;
+            try
+            {
+                if (page <= 0) page = 1;
+                if (size <= 0) size = 5;
 
-            var sortableFields = new List<string> { "id", "code", "name", "category", "brand", "type", "description" };
-            if (!sortableFields.Contains(sort.ToLower())) sort = "id";
-            if (dir.ToLower() != "desc" && dir.ToLower() != "asc") dir = "asc";
+                var sortableFields = new List<string> { "id", "code", "name", "category", "brand", "type", "description" };
+                if (!sortableFields.Contains(sort.ToLower())) sort = "id";
+                if (dir.ToLower() != "desc" && dir.ToLower() != "asc") dir = "asc";
 
-            string orderBy = $"{sort} {dir}";
+                string orderBy = $"{sort} {dir}";
 
-            IQueryable<Product> query = _context.Products.OrderBy(orderBy);
+                IQueryable<Product> query = _context.Products.OrderBy(orderBy);
 
-            var totalItems = await query.CountAsync();
-            var pagedResult = await query.Skip((page - 1) * size).Take(size).ToListAsync();
+                var totalItems = await query.CountAsync();
+                var pagedResult = await query.Skip((page - 1) * size).Take(size).ToListAsync();
 
-            return Ok(new { items = pagedResult, totalCount = totalItems });
+                return CreateResponse("Products retrieved successfully", new { items = pagedResult, totalCount = totalItems }, "success");
+            }
+            catch (Exception ex)
+            {
+                return CreateResponse($"An error occurred: {ex.Message}", null, "fail");
+            }
         }
 
         // GET: api/products/code
         [HttpGet("{code}")]
-        public async Task<ActionResult<Product>> GetProduct(string code)
+        public async Task<IActionResult> GetProduct(string code)
         {
-            var product = await _context.Products.FirstOrDefaultAsync(p => p.Code == code);
-            if (product == null)
+            try
             {
-                return NotFound();
+                var product = await _context.Products.FirstOrDefaultAsync(p => p.Code == code);
+                if (product == null)
+                {
+                    return CreateResponse("Product not found", null, "fail");
+                }
+                return CreateResponse("Product retrieved successfully", product, "success");
             }
-            return product;
+            catch (Exception ex)
+            {
+                return CreateResponse($"An error occurred: {ex.Message}", null, "fail");
+            }
         }
 
         // POST: api/products
         [HttpPost]
-        public async Task<ActionResult<Product>> PostProduct(Product product)
+        public async Task<IActionResult> PostProduct(Product product)
         {
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetProduct), new { code = product.Code }, product);
+            try
+            {
+                _context.Products.Add(product);
+                await _context.SaveChangesAsync();
+                return CreateResponse("Product created successfully", product, "success");
+            }
+            catch (Exception ex)
+            {
+                return CreateResponse($"An error occurred: {ex.Message}", null, "fail");
+            }
         }
 
         // PUT: api/products/code
         [HttpPut("{code}")]
         public async Task<IActionResult> PutProduct(string code, Product product)
-        {
-            if (code != product.Code)
-            {
-                return BadRequest("Product code mismatch.");
-            }
-
-            _context.Entry(product).State = EntityState.Modified;
-
+        {           
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(code))
+                if (code != product.Code)
                 {
-                    return NotFound();
+                    return CreateResponse("Product code mismatch", null, "fail");
                 }
-                else
-                {
-                    throw;
-                }
-            }
 
-            return Ok("Product updated successfully.");
+                if (!ProductExists(product.Code))
+                {
+                    return CreateResponse("Product not found", null, "fail");
+                }
+
+                if (!ProductExists(product.Id))
+                {
+                    return CreateResponse("Product ID not found", null, "fail");
+                }
+
+                _context.Entry(product).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+                return CreateResponse("Product updated successfully", product, "success");
+            }
+            catch (Exception ex)
+            {
+                return CreateResponse($"An error occurred: {ex.Message}", null, "fail");
+            }
         }
 
         // DELETE: api/products/code
         [HttpDelete("{code}")]
         public async Task<IActionResult> DeleteProduct(string code)
         {
-            var product = await _context.Products.FirstOrDefaultAsync(p => p.Code == code);
-            if (product == null)
+            try
             {
-                return NotFound();
+                var product = await _context.Products.FirstOrDefaultAsync(p => p.Code == code);
+                if (product == null)
+                {
+                    return CreateResponse("Product not found", null, "fail");
+                }
+
+                _context.Products.Remove(product);
+                await _context.SaveChangesAsync();
+                return CreateResponse("Product deleted successfully", null, "success");
             }
-
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
-
-            return Ok("Product deleted successfully.");
+            catch (Exception ex)
+            {
+                return CreateResponse($"An error occurred: {ex.Message}", null, "fail");
+            }
         }
 
         private bool ProductExists(string code)
         {
             return _context.Products.Any(e => e.Code == code);
+        }
+
+        private bool ProductExists(int id)
+        {
+            return _context.Products.Any(e => e.Id == id);
         }
     }
 }
