@@ -1,5 +1,11 @@
 import httpModule from "../helpers/http.module";
 import { IProduct, ICreateProduct } from "../types/product.tying";
+interface ApiResponse<T> {
+  status: string;
+  message: string;
+  responseData: T;
+  timeStamp: string;
+}
 
 const API_ENDPOINT = "/products";
 
@@ -11,11 +17,17 @@ const ProductService = {
     dir: string = "asc"
   ): Promise<{ items: IProduct[]; totalCount: number }> => {
     try {
-      const response = await httpModule.get<{
-        items: IProduct[];
-        totalCount: number;
-      }>(`${API_ENDPOINT}?page=${page}&size=${size}&sort=${sort}&dir=${dir}`);
-      return response.data;
+      const response = await httpModule.get<
+        ApiResponse<{
+          items: IProduct[];
+          totalCount: number;
+        }>
+      >(`${API_ENDPOINT}?page=${page}&size=${size}&sort=${sort}&dir=${dir}`);
+
+      if (response.data.status === "success") {
+        return response.data.responseData;
+      }
+      throw new Error(response.data.message);
     } catch (error) {
       throw new Error("Failed to fetch products");
     }
@@ -23,10 +35,14 @@ const ProductService = {
 
   getProductByCode: async (code: string): Promise<IProduct> => {
     try {
-      const response = await httpModule.get<IProduct>(
+      const response = await httpModule.get<ApiResponse<IProduct>>(
         `${API_ENDPOINT}/${code}`
       );
-      return response.data;
+
+      if (response.data.status === "success") {
+        return response.data.responseData;
+      }
+      throw new Error(response.data.message);
     } catch (error) {
       throw new Error("Failed to fetch product");
     }
@@ -34,11 +50,14 @@ const ProductService = {
 
   createProduct: async (productData: ICreateProduct): Promise<IProduct> => {
     try {
-      const response = await httpModule.post<IProduct>(
+      const response = await httpModule.post<ApiResponse<IProduct>>(
         API_ENDPOINT,
         productData
       );
-      return response.data;
+      if (response.data.status === "success") {
+        return response.data.responseData;
+      }
+      throw new Error(response.data.message);
     } catch (error) {
       throw new Error("Failed to create product");
     }
