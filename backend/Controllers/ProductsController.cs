@@ -1,27 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using backend.Models;
-using System.Drawing;
-using System.Linq.Dynamic.Core;
+using backend.Repositories;
+using NuGet.Protocol.Core.Types;
+
 namespace backend.Controllers
 {
     [Route("api/products")]
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly MeuTrainingContext _context;
+        private readonly IProductRepository _productRepository;
 
-        public ProductsController(MeuTrainingContext context)
+        public ProductsController(IProductRepository productRepository)
         {
-            _context = context;
+            _productRepository = productRepository;
         }
 
-        private ObjectResult CreateResponse(string message, object data, string status)
+        private ObjectResult CreateResponse(string message, object? data, string status)
         {
             return new ObjectResult(new
             {
@@ -45,16 +40,8 @@ namespace backend.Controllers
                 if (page <= 0) page = 1;
                 if (size <= 0) size = 5;
 
-                var sortableFields = new List<string> { "id", "code", "name", "category", "brand", "type", "description" };
-                if (!sortableFields.Contains(sort.ToLower())) sort = "id";
-                if (dir.ToLower() != "desc" && dir.ToLower() != "asc") dir = "asc";
-
-                string orderBy = $"{sort} {dir}";
-
-                IQueryable<Product> query = _context.Products.OrderBy(orderBy);
-
-                var totalItems = await query.CountAsync();
-                var pagedResult = await query.Skip((page - 1) * size).Take(size).ToListAsync();
+                var totalItems = await _productRepository.GetTotalProductsCountAsync();
+                var pagedResult = await _productRepository.GetProductsPagedAsync(page, size, sort, dir);
 
                 return CreateResponse("Products retrieved successfully", new { items = pagedResult, totalCount = totalItems }, "success");
             }
@@ -70,7 +57,7 @@ namespace backend.Controllers
         {
             try
             {
-                var product = await _context.Products.FirstOrDefaultAsync(p => p.Code == code);
+                var product = await _productRepository.GetProductByCodeAsync(code);
                 if (product == null)
                 {
                     return CreateResponse("Product not found", null, "fail");
@@ -85,13 +72,19 @@ namespace backend.Controllers
 
         // POST: api/products
         [HttpPost]
-        public async Task<IActionResult> PostProduct(Product product)
+        public async Task<IActionResult> AddProduct(Product product)
         {
             try
             {
-                _context.Products.Add(product);
-                await _context.SaveChangesAsync();
-                return CreateResponse("Product created successfully", product, "success");
+                bool result = await _productRepository.AddProductAsync(product);
+                if (result)
+                {
+                    return CreateResponse("Product added successfully", product, "success");
+                }
+                else
+                {
+                    return CreateResponse("Product addition failed", null, "fail");
+                }
             }
             catch (Exception ex)
             {
@@ -102,7 +95,7 @@ namespace backend.Controllers
         // PUT: api/products/code
         [HttpPut("{code}")]
         public async Task<IActionResult> PutProduct(string code, Product product)
-        {           
+        {
             try
             {
                 if (code != product.Code)
@@ -110,19 +103,21 @@ namespace backend.Controllers
                     return CreateResponse("Product code mismatch", null, "fail");
                 }
 
-                if (!ProductExists(product.Code))
+                var codeExists = await _productRepository.ProductExistsAsync(product.Code);
+                if (!codeExists)
                 {
                     return CreateResponse("Product not found", null, "fail");
                 }
 
-                if (!ProductExists(product.Id))
+                bool result = await _productRepository.UpdateProductAsync(product);
+                if (result)
                 {
-                    return CreateResponse("Product ID not found", null, "fail");
+                    return CreateResponse("Product updated successfully", product, "success");
                 }
-
-                _context.Entry(product).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
-                return CreateResponse("Product updated successfully", product, "success");
+                else
+                {
+                    return CreateResponse("Product update failed", null, "fail");
+                }
             }
             catch (Exception ex)
             {
@@ -136,30 +131,20 @@ namespace backend.Controllers
         {
             try
             {
-                var product = await _context.Products.FirstOrDefaultAsync(p => p.Code == code);
-                if (product == null)
+                bool result = await _productRepository.DeleteProductAsync(code);
+                if (result)
+                {
+                    return CreateResponse("Product deleted successfully", null, "success");
+                }
+                else
                 {
                     return CreateResponse("Product not found", null, "fail");
                 }
-
-                _context.Products.Remove(product);
-                await _context.SaveChangesAsync();
-                return CreateResponse("Product deleted successfully", null, "success");
             }
             catch (Exception ex)
             {
                 return CreateResponse($"An error occurred: {ex.Message}", null, "fail");
             }
-        }
-
-        private bool ProductExists(string code)
-        {
-            return _context.Products.Any(e => e.Code == code);
-        }
-
-        private bool ProductExists(int id)
-        {
-            return _context.Products.Any(e => e.Id == id);
         }
     }
 }
