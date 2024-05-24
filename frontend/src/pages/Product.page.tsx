@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -21,11 +21,7 @@ const Product = () => {
   const [pageSize, setPageSize] = useState<number>(10);
   const [totalProducts, setTotalProducts] = useState<number>(0);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [page, pageSize]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const productData = await ProductService.getAllProducts(page, pageSize);
@@ -41,7 +37,11 @@ const Product = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, pageSize]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const openForm = () => setIsFormOpen(true);
 

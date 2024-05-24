@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ICreateProduct } from "../types/product.tying";
 import {
   Button,
@@ -33,11 +33,7 @@ const ProductForm = ({
   const [loading, setLoading] = useState(false);
   const isEditing = productCode !== "";
 
-  useEffect(() => {
-    fetchProductData();
-  }, [productCode]);
-
-  const fetchProductData = async () => {
+  const fetchProductData = useCallback(async () => {
     if (isEditing) {
       try {
         const data = await ProductService.getProductByCode(productCode);
@@ -48,7 +44,11 @@ const ProductForm = ({
       } finally {
       }
     }
-  };
+  }, [productCode]);
+
+  useEffect(() => {
+    fetchProductData();
+  }, [fetchProductData]);
 
   const handleInputChange = (field: string, value: string) => {
     setProduct((prevProduct) => ({
