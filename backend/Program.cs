@@ -1,3 +1,4 @@
+using backend.Repositories;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,8 @@ builder.Services.AddDbContext<MeuTrainingContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("MeuTraing"));
 });
+
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 var app = builder.Build();
 
