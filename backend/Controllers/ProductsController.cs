@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using backend.Models;
 using backend.Repositories;
-using NuGet.Protocol.Core.Types;
+using backend.Helpers;
 
 namespace backend.Controllers
 {
@@ -10,21 +10,12 @@ namespace backend.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductRepository _productRepository;
+        private readonly ResponseHelper _responseHelper;
 
-        public ProductsController(IProductRepository productRepository)
+        public ProductsController(IProductRepository productRepository, ResponseHelper responseHelper)
         {
             _productRepository = productRepository;
-        }
-
-        private ObjectResult CreateResponse(string message, object? data, string status)
-        {
-            return new ObjectResult(new
-            {
-                message = message,
-                responseData = data,
-                status = status,
-                timeStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-            });
+            _responseHelper = responseHelper;
         }
 
         // GET: /api/products?page=1&size=5&sort=id&dir=asc
@@ -43,11 +34,11 @@ namespace backend.Controllers
                 var totalItems = await _productRepository.GetTotalProductsCountAsync();
                 var pagedResult = await _productRepository.GetProductsPagedAsync(page, size, sort, dir);
 
-                return CreateResponse("Products retrieved successfully", new { items = pagedResult, totalCount = totalItems }, "success");
+                return _responseHelper.CreateResponse("Products retrieved successfully", new { items = pagedResult, totalCount = totalItems }, "success");
             }
             catch (Exception ex)
             {
-                return CreateResponse($"An error occurred: {ex.Message}", null, "fail");
+                return _responseHelper.CreateResponse($"An error occurred: {ex.Message}", null, "fail");
             }
         }
 
@@ -60,13 +51,13 @@ namespace backend.Controllers
                 var product = await _productRepository.GetProductByCodeAsync(code);
                 if (product == null)
                 {
-                    return CreateResponse("Product not found", null, "fail");
+                    return _responseHelper.CreateResponse("Product not found", null, "fail");
                 }
-                return CreateResponse("Product retrieved successfully", product, "success");
+                return _responseHelper.CreateResponse("Product retrieved successfully", product, "success");
             }
             catch (Exception ex)
             {
-                return CreateResponse($"An error occurred: {ex.Message}", null, "fail");
+                return _responseHelper.CreateResponse($"An error occurred: {ex.Message}", null, "fail");
             }
         }
 
@@ -79,16 +70,16 @@ namespace backend.Controllers
                 bool result = await _productRepository.AddProductAsync(product);
                 if (result)
                 {
-                    return CreateResponse("Product added successfully", product, "success");
+                    return _responseHelper.CreateResponse("Product added successfully", product, "success");
                 }
                 else
                 {
-                    return CreateResponse("Product addition failed", null, "fail");
+                    return _responseHelper.CreateResponse("Product addition failed", null, "fail");
                 }
             }
             catch (Exception ex)
             {
-                return CreateResponse($"An error occurred: {ex.Message}", null, "fail");
+                return _responseHelper.CreateResponse($"An error occurred: {ex.Message}", null, "fail");
             }
         }
 
@@ -100,28 +91,28 @@ namespace backend.Controllers
             {
                 if (code != product.Code)
                 {
-                    return CreateResponse("Product code mismatch", null, "fail");
+                    return _responseHelper.CreateResponse("Product code mismatch", null, "fail");
                 }
 
                 var codeExists = await _productRepository.ProductExistsAsync(product.Code);
                 if (!codeExists)
                 {
-                    return CreateResponse("Product not found", null, "fail");
+                    return _responseHelper.CreateResponse("Product not found", null, "fail");
                 }
 
                 bool result = await _productRepository.UpdateProductAsync(product);
                 if (result)
                 {
-                    return CreateResponse("Product updated successfully", product, "success");
+                    return _responseHelper.CreateResponse("Product updated successfully", product, "success");
                 }
                 else
                 {
-                    return CreateResponse("Product update failed", null, "fail");
+                    return _responseHelper.CreateResponse("Product update failed", null, "fail");
                 }
             }
             catch (Exception ex)
             {
-                return CreateResponse($"An error occurred: {ex.Message}", null, "fail");
+                return _responseHelper.CreateResponse($"An error occurred: {ex.Message}", null, "fail");
             }
         }
 
@@ -134,16 +125,16 @@ namespace backend.Controllers
                 bool result = await _productRepository.DeleteProductAsync(code);
                 if (result)
                 {
-                    return CreateResponse("Product deleted successfully", null, "success");
+                    return _responseHelper.CreateResponse("Product deleted successfully", null, "success");
                 }
                 else
                 {
-                    return CreateResponse("Product not found", null, "fail");
+                    return _responseHelper.CreateResponse("Product not found", null, "fail");
                 }
             }
             catch (Exception ex)
             {
-                return CreateResponse($"An error occurred: {ex.Message}", null, "fail");
+                return _responseHelper.CreateResponse($"An error occurred: {ex.Message}", null, "fail");
             }
         }
     }

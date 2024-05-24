@@ -1,6 +1,7 @@
 using backend.Repositories;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
+using backend.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,7 @@ builder.Services.AddDbContext<MeuTrainingContext>(options =>
 });
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ResponseHelper>();
 
 var app = builder.Build();
 
