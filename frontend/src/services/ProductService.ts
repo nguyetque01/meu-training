@@ -14,7 +14,8 @@ const ProductService = {
     page: number = 1,
     size: number = 10,
     sort: string = "id",
-    dir: string = "asc"
+    dir: string = "asc",
+    search: string = ""
   ): Promise<{ items: IProduct[]; totalCount: number }> => {
     try {
       const response = await httpModule.get<
@@ -22,7 +23,9 @@ const ProductService = {
           items: IProduct[];
           totalCount: number;
         }>
-      >(`${API_ENDPOINT}?page=${page}&size=${size}&sort=${sort}&dir=${dir}`);
+      >(
+        `${API_ENDPOINT}?page=${page}&size=${size}&sort=${sort}&dir=${dir}&search=${search}`
+      );
 
       if (response.data.status === "success") {
         return response.data.responseData;

@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import Product from "./pages/Product.page";
+import Product from "./pages/product/Product.page";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 

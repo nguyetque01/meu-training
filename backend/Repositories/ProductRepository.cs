@@ -13,12 +13,23 @@ namespace backend.Repositories
             _context = context;
         }
 
-        public async Task<int> GetTotalProductsCountAsync()
+        public async Task<int> GetTotalProductsCountAsync(string search = "")
         {
-            return await _context.Products.CountAsync();
+            var query = _context.Products.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(p => p.Name.Contains(search) ||
+                                         p.Code.Contains(search) ||
+                                         p.Category.Contains(search) ||
+                                         (p.Brand != null && p.Brand.Contains(search)) ||
+                                         (p.Type != null && p.Type.Contains(search)) ||
+                                         (p.Description != null && p.Description.Contains(search)));
+            }
+            return await query.CountAsync();
         }
 
-        public async Task<List<Product>> GetProductsPagedAsync(int page, int size, string sort, string dir)
+        public async Task<IEnumerable<Product>> GetProductsPagedAsync(int page, int size, string sort, string dir, string search = "")
         {
             var sortableFields = new List<string> { "id", "code", "name", "category", "brand", "type", "description" };
             if (!sortableFields.Contains(sort.ToLower())) sort = "id";
@@ -26,7 +37,18 @@ namespace backend.Repositories
 
             string orderBy = $"{sort} {dir}";
 
-            return await _context.Products.OrderBy(orderBy).Skip((page - 1) * size).Take(size).ToListAsync();
+            var query = _context.Products.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(p => p.Code.Contains(search) ||
+                                         p.Name.Contains(search) ||
+                                         p.Category.Contains(search) ||
+                                         (p.Brand != null && p.Brand.Contains(search)) ||
+                                         (p.Type != null && p.Type.Contains(search)) ||
+                                         (p.Description != null && p.Description.Contains(search)));
+            }     
+            return await query.OrderBy(orderBy).Skip((page - 1) * size).Take(size).ToListAsync();
         }
 
         public async Task<Product> GetProductByCodeAsync(string code)

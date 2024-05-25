@@ -10,7 +10,7 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import { IProduct } from "../types/product.tying";
+import { IProduct } from "../../types/product.tying";
 
 interface ProductGridProps {
   products: IProduct[];
