@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   TextField,
   Button,
@@ -18,6 +18,14 @@ const SearchBox: React.FC<ISearchBoxProps> = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchColumn, setSearchColumn] = useState<string>("all");
 
+  useEffect(() => {
+    const searchTimeout = setTimeout(() => {
+      handleSearch();
+    }, 1000);
+
+    return () => clearTimeout(searchTimeout);
+  }, [searchTerm]);
+
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
@@ -26,13 +34,13 @@ const SearchBox: React.FC<ISearchBoxProps> = ({ onSearch }) => {
     setSearchColumn(event.target.value as string);
   };
 
-  const handleSearchClick = () => {
+  const handleSearch = () => {
     onSearch(searchTerm, searchColumn);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      handleSearchClick();
+      handleSearch();
     }
   };
 
@@ -63,7 +71,7 @@ const SearchBox: React.FC<ISearchBoxProps> = ({ onSearch }) => {
         variant="outlined"
         sx={{ mr: 2, width: "100%" }}
       />
-      <Button variant="contained" onClick={handleSearchClick}>
+      <Button variant="contained" onClick={handleSearch}>
         Search
       </Button>
     </Box>
