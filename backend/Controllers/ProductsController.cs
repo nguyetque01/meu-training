@@ -11,7 +11,6 @@ namespace backend.Controllers
     {
         private readonly IProductRepository _productRepository;
         private readonly ResponseHelper _responseHelper;
-
         public ProductsController(IProductRepository productRepository, ResponseHelper responseHelper)
         {
             _productRepository = productRepository;
