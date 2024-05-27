@@ -16,12 +16,13 @@ import SearchBox from "../../components/search/SearchBox.component";
 const Product = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [productCode, setProductCode] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [totalProducts, setTotalProducts] = useState<number>(0);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchColumn, setSearchColumn] = useState<string>("all");
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -31,7 +32,8 @@ const Product = () => {
         pageSize,
         undefined,
         undefined,
-        searchTerm
+        searchTerm,
+        searchColumn
       );
       if (!productData || !productData.items) {
         console.error("Product data or items is undefined");
@@ -45,7 +47,7 @@ const Product = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, searchTerm]);
+  }, [page, pageSize, searchTerm, searchColumn]);
 
   useEffect(() => {
     fetchProducts();
@@ -84,8 +86,10 @@ const Product = () => {
     setPageSize(newPageSize);
   };
 
-  const handleSearch = (searchTerm: string) => {
+  const handleSearch = (searchTerm: string, searchColumn: string) => {
     setSearchTerm(searchTerm);
+    setSearchColumn(searchColumn);
+    setPage(1);
   };
 
   return (
@@ -111,11 +115,7 @@ const Product = () => {
         </Button>
       </Box>
 
-      {loading ? (
-        <Box sx={{ p: 2, textAlign: "center" }}>
-          <CircularProgress size={100} />
-        </Box>
-      ) : isFormOpen ? (
+      {isFormOpen ? (
         <div className="form-content">
           <ProductForm
             productCode={productCode}
@@ -128,7 +128,11 @@ const Product = () => {
           <Box sx={{ p: 2 }}>
             <SearchBox onSearch={handleSearch} />
           </Box>
-          {products?.length === 0 ? (
+          {loading ? (
+            <Box sx={{ p: 2, textAlign: "center" }}>
+              <CircularProgress size={100} />
+            </Box>
+          ) : products?.length === 0 ? (
             <Box sx={{ p: 2, textAlign: "center" }}>
               <Typography variant="h5">Not found</Typography>
             </Box>
@@ -139,6 +143,7 @@ const Product = () => {
               page={page}
               pageSize={pageSize}
               totalProducts={totalProducts}
+              searchTerm={searchTerm}
               onChangePage={handleChangePage}
               onChangePageSize={handleChangePageSize}
             />

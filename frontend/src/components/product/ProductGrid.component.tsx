@@ -17,6 +17,7 @@ interface ProductGridProps {
   page: number;
   pageSize: number;
   totalProducts: number;
+  searchTerm: string;
   handleClickEditBtn: (code: string) => void;
   onChangePage: (newPage: number) => void;
   onChangePageSize: (newPageSize: number) => void;
@@ -27,6 +28,7 @@ const ProductGrid = ({
   page,
   pageSize,
   totalProducts,
+  searchTerm,
   handleClickEditBtn,
   onChangePage,
   onChangePageSize,
@@ -40,6 +42,22 @@ const ProductGrid = ({
   ) => {
     onChangePageSize(parseInt(event.target.value, 10));
     onChangePage(1);
+  };
+
+  const highlightText = (text: string, highlight: string) => {
+    if (!highlight.trim()) {
+      return text;
+    }
+    const regex = new RegExp(`(${highlight})`, "gi");
+    return text.split(regex).map((part, index) =>
+      regex.test(part) ? (
+        <span key={index} style={{ backgroundColor: "yellow" }}>
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
   };
 
   return (
@@ -61,13 +79,24 @@ const ProductGrid = ({
           <TableBody>
             {products?.map((product) => (
               <TableRow key={product.id}>
-                <TableCell>{product.id}</TableCell>
-                <TableCell>{product.code}</TableCell>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>{product.category}</TableCell>
-                <TableCell>{product.brand}</TableCell>
-                <TableCell>{product.type}</TableCell>
-                <TableCell>{product.description}</TableCell>
+                <TableCell>
+                  {highlightText(product.id.toString(), searchTerm)}
+                </TableCell>
+                <TableCell>{highlightText(product.code, searchTerm)}</TableCell>
+                <TableCell>{highlightText(product.name, searchTerm)}</TableCell>
+                <TableCell>
+                  {highlightText(product.category, searchTerm)}
+                </TableCell>
+                <TableCell>
+                  {product.brand && highlightText(product.brand, searchTerm)}
+                </TableCell>
+                <TableCell>
+                  {product.type && highlightText(product.type, searchTerm)}
+                </TableCell>
+                <TableCell>
+                  {product.description &&
+                    highlightText(product.description, searchTerm)}
+                </TableCell>
                 <TableCell>
                   <Button
                     aria-label="edit"

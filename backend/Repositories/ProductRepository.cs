@@ -1,35 +1,34 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
 using backend.Models;
+using backend.Helpers;
 
 namespace backend.Repositories
 {
     public class ProductRepository : IProductRepository
     {
         private readonly MeuTrainingContext _context;
+        private readonly SearchHelper _searchHelper;
 
-        public ProductRepository(MeuTrainingContext context)
+        public ProductRepository(MeuTrainingContext context, SearchHelper searchHelper)
         {
             _context = context;
+            _searchHelper = searchHelper;
         }
 
-        public async Task<int> GetTotalProductsCountAsync(string search = "")
+        public async Task<int> GetTotalProductsCountAsync(string search = "", string searchColumn = "")
         {
             var query = _context.Products.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                query = query.Where(p => p.Name.Contains(search) ||
-                                         p.Code.Contains(search) ||
-                                         p.Category.Contains(search) ||
-                                         (p.Brand != null && p.Brand.Contains(search)) ||
-                                         (p.Type != null && p.Type.Contains(search)) ||
-                                         (p.Description != null && p.Description.Contains(search)));
+                query = _searchHelper.ProductSearchFilter(query, search, searchColumn);
             }
+
             return await query.CountAsync();
         }
 
-        public async Task<IEnumerable<Product>> GetProductsPagedAsync(int page, int size, string sort, string dir, string search = "")
+        public async Task<IEnumerable<Product>> GetProductsPagedAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "")
         {
             var sortableFields = new List<string> { "id", "code", "name", "category", "brand", "type", "description" };
             if (!sortableFields.Contains(sort.ToLower())) sort = "id";
@@ -41,13 +40,9 @@ namespace backend.Repositories
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                query = query.Where(p => p.Code.Contains(search) ||
-                                         p.Name.Contains(search) ||
-                                         p.Category.Contains(search) ||
-                                         (p.Brand != null && p.Brand.Contains(search)) ||
-                                         (p.Type != null && p.Type.Contains(search)) ||
-                                         (p.Description != null && p.Description.Contains(search)));
-            }     
+                query = _searchHelper.ProductSearchFilter(query, search, searchColumn);
+            }
+
             return await query.OrderBy(orderBy).Skip((page - 1) * size).Take(size).ToListAsync();
         }
 

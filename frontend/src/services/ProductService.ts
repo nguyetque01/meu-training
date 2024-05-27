@@ -15,17 +15,23 @@ const ProductService = {
     size: number = 10,
     sort: string = "id",
     dir: string = "asc",
-    search: string = ""
+    search: string = "",
+    searchColumn: string = "all"
   ): Promise<{ items: IProduct[]; totalCount: number }> => {
     try {
+      let endpoint = `${API_ENDPOINT}?page=${page}&size=${size}&sort=${sort}&dir=${dir}`;
+      if (search && searchColumn !== "all") {
+        endpoint += `&search=${search}&searchColumn=${searchColumn}`;
+      } else if (search) {
+        endpoint += `&search=${search}`;
+      }
+
       const response = await httpModule.get<
         ApiResponse<{
           items: IProduct[];
           totalCount: number;
         }>
-      >(
-        `${API_ENDPOINT}?page=${page}&size=${size}&sort=${sort}&dir=${dir}&search=${search}`
-      );
+      >(endpoint);
 
       if (response.data.status === "success") {
         return response.data.responseData;
