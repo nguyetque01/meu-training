@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ICreateProduct } from "../types/product.tying";
+import { ICreateProduct } from "../../types/product.tying";
 import {
   Button,
   TextField,
@@ -7,7 +7,7 @@ import {
   Grid,
   CircularProgress,
 } from "@mui/material";
-import ProductService from "../services/ProductService";
+import ProductService from "../../services/ProductService";
 import { toast } from "react-toastify";
 
 interface IProductFormProps {
