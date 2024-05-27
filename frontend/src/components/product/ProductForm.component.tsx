@@ -44,7 +44,7 @@ const ProductForm = ({
       } finally {
       }
     }
-  }, [productCode]);
+  }, [isEditing, productCode]);
 
   useEffect(() => {
     fetchProductData();
