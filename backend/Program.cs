@@ -19,6 +19,7 @@ builder.Services.AddDbContext<MeuTrainingContext>(options =>
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ResponseHelper>();
+builder.Services.AddScoped<SearchHelper>();
 
 var app = builder.Build();
 

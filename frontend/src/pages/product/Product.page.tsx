@@ -7,24 +7,34 @@ import {
   Typography,
 } from "@mui/material";
 import { toast } from "react-toastify";
-import { IProduct } from "../types/product.tying";
-import ProductForm from "../components/ProductForm.component";
-import ProductGrid from "../components/ProductGrid.component";
-import ProductService from "../services/ProductService";
+import { IProduct } from "../../types/product.tying";
+import ProductForm from "../../components/product/ProductForm.component";
+import ProductGrid from "../../components/product/ProductGrid.component";
+import ProductService from "../../services/ProductService";
+import SearchBox from "../../components/search/SearchBox.component";
 
 const Product = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [productCode, setProductCode] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [totalProducts, setTotalProducts] = useState<number>(0);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchColumn, setSearchColumn] = useState<string>("all");
 
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
-      const productData = await ProductService.getAllProducts(page, pageSize);
+      const productData = await ProductService.getAllProducts(
+        page,
+        pageSize,
+        undefined,
+        undefined,
+        searchTerm,
+        searchColumn
+      );
       if (!productData || !productData.items) {
         console.error("Product data or items is undefined");
       } else {
@@ -37,7 +47,7 @@ const Product = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize]);
+  }, [page, pageSize, searchTerm, searchColumn]);
 
   useEffect(() => {
     fetchProducts();
@@ -76,6 +86,12 @@ const Product = () => {
     setPageSize(newPageSize);
   };
 
+  const handleSearch = (searchTerm: string, searchColumn: string) => {
+    setSearchTerm(searchTerm);
+    setSearchColumn(searchColumn);
+    setPage(1);
+  };
+
   return (
     <Paper className="content">
       <Box
@@ -98,15 +114,8 @@ const Product = () => {
           {isFormOpen ? "Back To Listing" : "Create New Product"}
         </Button>
       </Box>
-      {loading ? (
-        <Box sx={{ p: 2, textAlign: "center" }}>
-          <CircularProgress size={100} />
-        </Box>
-      ) : products?.length === 0 ? (
-        <Box sx={{ p: 2, textAlign: "center" }}>
-          <Typography variant="h5">Not found</Typography>
-        </Box>
-      ) : isFormOpen ? (
+
+      {isFormOpen ? (
         <div className="form-content">
           <ProductForm
             productCode={productCode}
@@ -115,15 +124,31 @@ const Product = () => {
           />
         </div>
       ) : (
-        <ProductGrid
-          products={products}
-          handleClickEditBtn={handleClickEditBtn}
-          page={page}
-          pageSize={pageSize}
-          totalProducts={totalProducts}
-          onChangePage={handleChangePage}
-          onChangePageSize={handleChangePageSize}
-        />
+        <>
+          <Box sx={{ p: 2 }}>
+            <SearchBox onSearch={handleSearch} />
+          </Box>
+          {loading ? (
+            <Box sx={{ p: 2, textAlign: "center" }}>
+              <CircularProgress size={100} />
+            </Box>
+          ) : products?.length === 0 ? (
+            <Box sx={{ p: 2, textAlign: "center" }}>
+              <Typography variant="h5">Not found</Typography>
+            </Box>
+          ) : (
+            <ProductGrid
+              products={products}
+              handleClickEditBtn={handleClickEditBtn}
+              page={page}
+              pageSize={pageSize}
+              totalProducts={totalProducts}
+              searchTerm={searchTerm}
+              onChangePage={handleChangePage}
+              onChangePageSize={handleChangePageSize}
+            />
+          )}
+        </>
       )}
     </Paper>
   );
