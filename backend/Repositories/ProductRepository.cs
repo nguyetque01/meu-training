@@ -19,31 +19,21 @@ namespace backend.Repositories
 
         public async Task<(int totalCount, IEnumerable<Product> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "")
         {
-            var sortableFields = new List<string> { "id", "code", "name", "category", "brand", "type", "description" };
-            if (!sortableFields.Contains(sort.ToLower())) sort = "id";
-            if (dir.ToLower() != "desc" && dir.ToLower() != "asc") dir = "asc";
-
-            string orderBy = $"{sort} {dir}";
-
             var query = _context.Products.AsQueryable();
-
-            int totalCount;
-            IEnumerable<Product> products;
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                var allProducts = await query.ToListAsync();
-                var filteredProducts = _searchHelper.ProductSearchFilter(allProducts, search, searchColumn);
-                totalCount = filteredProducts.Count();
-                products = filteredProducts.AsQueryable().OrderBy(orderBy).Skip((page - 1) * size).Take(size).ToList();
+                query = _searchHelper.ApplyProductSearchFilter(query, search, searchColumn);
             }
-            else
-            {
-                totalCount = await query.CountAsync();
-                products = await query.OrderBy(orderBy).Skip((page - 1) * size).Take(size).ToListAsync();
-            }
+
+            var totalCount = await query.CountAsync();
+            var products = await query.OrderBy($"{sort} {dir}")
+                                      .Skip((page - 1) * size)
+                                      .Take(size)
+                                      .ToListAsync();
+
             return (totalCount, products);
-        } 
+        }
 
         public async Task<Product> GetProductByCodeAsync(string code)
         {
