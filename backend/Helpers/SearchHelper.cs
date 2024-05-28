@@ -1,27 +1,34 @@
-﻿using backend.Models;
+﻿using System.Linq;
+using System.Text.RegularExpressions;
+using backend.Models;
+using System.Linq.Dynamic.Core;
+
 
 namespace backend.Helpers
 {
     public class SearchHelper
     {
-        public IQueryable<Product> ProductSearchFilter(IQueryable<Product> query, string search, string searchColumn)
+        public IEnumerable<Product> ProductSearchFilter(IEnumerable<Product> products, string search, string searchColumn)
         {
-            return query.Where(p =>
-                (searchColumn == "id" && p.Id.ToString().Contains(search)) ||
-                (searchColumn == "code" && p.Code.Contains(search)) ||
-                (searchColumn == "name" && p.Name.Contains(search)) ||
-                (searchColumn == "category" && p.Category.Contains(search)) ||
-                (searchColumn == "brand" && p.Brand != null && p.Brand.Contains(search)) ||
-                (searchColumn == "type" && p.Type != null && p.Type.Contains(search)) ||
-                (searchColumn == "description" && p.Description != null && p.Description.Contains(search)) ||
+            string pattern = $@"\b{Regex.Escape(search)}\b";
+            Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
+
+            return products.Where(p =>
+                (searchColumn == "id" && regex.IsMatch(p.Id.ToString())) ||
+                (searchColumn == "code" && regex.IsMatch(p.Code)) ||
+                (searchColumn == "name" && regex.IsMatch(p.Name)) ||
+                (searchColumn == "category" && regex.IsMatch(p.Category)) ||
+                (searchColumn == "brand" && p.Brand != null && regex.IsMatch(p.Brand)) ||
+                (searchColumn == "type" && p.Type != null && regex.IsMatch(p.Type)) ||
+                (searchColumn == "description" && p.Description != null && regex.IsMatch(p.Description)) ||
                 (searchColumn == "" || searchColumn == "all") &&
-                    (p.Id.ToString().Contains(search) ||
-                     p.Code.Contains(search) ||
-                     p.Name.Contains(search) ||
-                     p.Category.Contains(search) ||
-                     (p.Brand != null && p.Brand.Contains(search)) ||
-                     (p.Type != null && p.Type.Contains(search)) ||
-                     (p.Description != null && p.Description.Contains(search))));
+                    (regex.IsMatch(p.Id.ToString()) ||
+                     regex.IsMatch(p.Code) ||
+                     regex.IsMatch(p.Name) ||
+                     regex.IsMatch(p.Category) ||
+                     (p.Brand != null && regex.IsMatch(p.Brand)) ||
+                     (p.Type != null && regex.IsMatch(p.Type)) ||
+                     (p.Description != null && regex.IsMatch(p.Description))));
         }
     }
 }

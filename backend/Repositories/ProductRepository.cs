@@ -2,6 +2,7 @@
 using System.Linq.Dynamic.Core;
 using backend.Models;
 using backend.Helpers;
+using System.Text.RegularExpressions;
 
 namespace backend.Repositories
 {
@@ -26,16 +27,23 @@ namespace backend.Repositories
 
             var query = _context.Products.AsQueryable();
 
+            int totalCount;
+            IEnumerable<Product> products;
+
             if (!string.IsNullOrWhiteSpace(search))
             {
-                query = _searchHelper.ProductSearchFilter(query, search, searchColumn);
+                var allProducts = await query.ToListAsync();
+                var filteredProducts = _searchHelper.ProductSearchFilter(allProducts, search, searchColumn);
+                totalCount = filteredProducts.Count();
+                products = filteredProducts.AsQueryable().OrderBy(orderBy).Skip((page - 1) * size).Take(size).ToList();
             }
-
-            var totalCount = await query.CountAsync();
-            var products = await query.OrderBy(orderBy).Skip((page - 1) * size).Take(size).ToListAsync();
-
+            else
+            {
+                totalCount = await query.CountAsync();
+                products = await query.OrderBy(orderBy).Skip((page - 1) * size).Take(size).ToListAsync();
+            }
             return (totalCount, products);
-        }
+        } 
 
         public async Task<Product> GetProductByCodeAsync(string code)
         {
