@@ -144,6 +144,7 @@ const Product = () => {
               pageSize={pageSize}
               totalProducts={totalProducts}
               searchTerm={searchTerm}
+              searchColumn={searchColumn}
               onChangePage={handleChangePage}
               onChangePageSize={handleChangePageSize}
             />

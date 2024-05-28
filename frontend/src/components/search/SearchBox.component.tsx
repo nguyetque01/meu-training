@@ -26,16 +26,20 @@ const SearchBox: React.FC<ISearchBoxProps> = ({ onSearch }) => {
     return () => clearTimeout(searchTimeout);
   }, [searchTerm]);
 
+  useEffect(() => {
+    handleSearch();
+  }, [searchColumn]);
+
+  const handleSearch = () => {
+    onSearch(searchTerm, searchColumn);
+  };
+
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
   const handleColumnChange = (event: SelectChangeEvent<string>) => {
     setSearchColumn(event.target.value as string);
-  };
-
-  const handleSearch = () => {
-    onSearch(searchTerm, searchColumn);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {

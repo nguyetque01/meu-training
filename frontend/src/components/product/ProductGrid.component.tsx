@@ -18,6 +18,7 @@ interface ProductGridProps {
   pageSize: number;
   totalProducts: number;
   searchTerm: string;
+  searchColumn: string;
   handleClickEditBtn: (code: string) => void;
   onChangePage: (newPage: number) => void;
   onChangePageSize: (newPageSize: number) => void;
@@ -29,6 +30,7 @@ const ProductGrid = ({
   pageSize,
   totalProducts,
   searchTerm,
+  searchColumn,
   handleClickEditBtn,
   onChangePage,
   onChangePageSize,
@@ -44,8 +46,12 @@ const ProductGrid = ({
     onChangePage(1);
   };
 
-  const highlightText = (text: string, highlight: string) => {
-    if (!highlight.trim()) {
+  const highlightText = (
+    text: string,
+    highlight: string,
+    shouldHighlight: boolean
+  ) => {
+    if (!shouldHighlight || !highlight.trim()) {
       return text;
     }
     const regex = new RegExp(`(${highlight})`, "gi");
@@ -58,6 +64,10 @@ const ProductGrid = ({
         part
       )
     );
+  };
+
+  const shouldHighlight = (column: string) => {
+    return searchColumn === "all" || searchColumn === column;
   };
 
   return (
@@ -80,22 +90,56 @@ const ProductGrid = ({
             {products?.map((product) => (
               <TableRow key={product.id}>
                 <TableCell>
-                  {highlightText(product.id.toString(), searchTerm)}
-                </TableCell>
-                <TableCell>{highlightText(product.code, searchTerm)}</TableCell>
-                <TableCell>{highlightText(product.name, searchTerm)}</TableCell>
-                <TableCell>
-                  {highlightText(product.category, searchTerm)}
-                </TableCell>
-                <TableCell>
-                  {product.brand && highlightText(product.brand, searchTerm)}
+                  {highlightText(
+                    product.id.toString(),
+                    searchTerm,
+                    shouldHighlight("id")
+                  )}
                 </TableCell>
                 <TableCell>
-                  {product.type && highlightText(product.type, searchTerm)}
+                  {highlightText(
+                    product.code,
+                    searchTerm,
+                    shouldHighlight("code")
+                  )}
+                </TableCell>
+                <TableCell>
+                  {highlightText(
+                    product.name,
+                    searchTerm,
+                    shouldHighlight("name")
+                  )}
+                </TableCell>
+                <TableCell>
+                  {highlightText(
+                    product.category,
+                    searchTerm,
+                    shouldHighlight("category")
+                  )}
+                </TableCell>
+                <TableCell>
+                  {product.brand &&
+                    highlightText(
+                      product.brand,
+                      searchTerm,
+                      shouldHighlight("brand")
+                    )}
+                </TableCell>
+                <TableCell>
+                  {product.type &&
+                    highlightText(
+                      product.type,
+                      searchTerm,
+                      shouldHighlight("type")
+                    )}
                 </TableCell>
                 <TableCell>
                   {product.description &&
-                    highlightText(product.description, searchTerm)}
+                    highlightText(
+                      product.description,
+                      searchTerm,
+                      shouldHighlight("description")
+                    )}
                 </TableCell>
                 <TableCell>
                   <Button
