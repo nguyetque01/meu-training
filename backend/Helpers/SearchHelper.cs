@@ -13,15 +13,14 @@ namespace backend.Helpers
         {
             char[] punctuationMarks = { ' ', '-', ':', ',', '.', '?', '!' };
             string processedColumn = $"{column}.ToString().ToLower()"; 
-            string condition = $"{processedColumn}.Equals(@0) || " +
-                               $"{processedColumn}.StartsWith(@0 + \" \") || " +
-                               $"{processedColumn}.EndsWith(\" \" + @0)";
+            string condition = $"{processedColumn}.Equals(@0)";
 
             foreach (char punctuationMark in punctuationMarks)
             {
+                condition += $" || {processedColumn}.StartsWith(@0 + \"{punctuationMark}\")";
+                condition += $" || {processedColumn}.EndsWith(\"{punctuationMark}\" + @0)";
                 condition += $" || {processedColumn}.Contains(\" \" + @0 + \"{punctuationMark}\")";
             }
-
             return condition;
         }
 
