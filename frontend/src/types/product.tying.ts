@@ -6,6 +6,7 @@ export interface IProduct {
   brand?: string;
   type?: string;
   description?: string;
+  searchMatches: { [key: string]: number[] };
 }
 
 export interface ICreateProduct {

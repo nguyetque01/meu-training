@@ -2,6 +2,7 @@
 using System.Linq.Dynamic.Core;
 using backend.Models;
 using backend.Helpers;
+using System.Text.RegularExpressions;
 
 namespace backend.Repositories
 {
@@ -16,34 +17,22 @@ namespace backend.Repositories
             _searchHelper = searchHelper;
         }
 
-        public async Task<int> GetTotalProductsCountAsync(string search = "", string searchColumn = "")
+        public async Task<(int totalCount, IEnumerable<Product> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "")
         {
             var query = _context.Products.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                query = _searchHelper.ProductSearchFilter(query, search, searchColumn);
+                query = _searchHelper.ApplyProductSearchFilter(query, search, searchColumn);
             }
 
-            return await query.CountAsync();
-        }
+            var totalCount = await query.CountAsync();
+            var products = await query.OrderBy($"{sort} {dir}")
+                                      .Skip((page - 1) * size)
+                                      .Take(size)
+                                      .ToListAsync();
 
-        public async Task<IEnumerable<Product>> GetProductsPagedAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "")
-        {
-            var sortableFields = new List<string> { "id", "code", "name", "category", "brand", "type", "description" };
-            if (!sortableFields.Contains(sort.ToLower())) sort = "id";
-            if (dir.ToLower() != "desc" && dir.ToLower() != "asc") dir = "asc";
-
-            string orderBy = $"{sort} {dir}";
-
-            var query = _context.Products.AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                query = _searchHelper.ProductSearchFilter(query, search, searchColumn);
-            }
-
-            return await query.OrderBy(orderBy).Skip((page - 1) * size).Take(size).ToListAsync();
+            return (totalCount, products);
         }
 
         public async Task<Product> GetProductByCodeAsync(string code)
