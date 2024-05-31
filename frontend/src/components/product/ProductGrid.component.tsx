@@ -46,24 +46,35 @@ const ProductGrid = ({
     onChangePage(1);
   };
 
-  const highlightText = (
-    text: string,
-    highlight: string,
-    shouldHighlight: boolean
-  ) => {
-    if (!shouldHighlight || !highlight.trim()) {
+  const highlightText = (text: string, matches: number[]) => {
+    if (!matches || matches.length === 0) {
       return text;
     }
-    const regex = new RegExp(`(${highlight})`, "gi");
-    return text.split(regex).map((part, index) =>
-      regex.test(part) ? (
-        <span key={index} style={{ backgroundColor: "yellow" }}>
-          {part}
-        </span>
-      ) : (
-        part
-      )
-    );
+
+    let highlightedText = text;
+    const words = highlightedText.split(" ");
+
+    matches.forEach((index) => {
+      let start = 0;
+      if (index > 0) {
+        for (let i = 0; i < index; i++) {
+          start += words[i].length + 1;
+        }
+      }
+
+      const end = start + searchTerm.length;
+
+      if (start >= 0 && start < end && end <= text.length) {
+        const word = text.substring(start, end);
+        const regexp = new RegExp(word, "g");
+        highlightedText = highlightedText.replace(
+          regexp,
+          `<span style="background-color: yellow;">${word}</span>`
+        );
+      }
+    });
+
+    return <span dangerouslySetInnerHTML={{ __html: highlightedText }} />;
   };
 
   const shouldHighlight = (column: string) => {
@@ -90,56 +101,55 @@ const ProductGrid = ({
             {products?.map((product) => (
               <TableRow key={product.id}>
                 <TableCell>
-                  {highlightText(
-                    product.id.toString(),
-                    searchTerm,
-                    shouldHighlight("id")
-                  )}
+                  {shouldHighlight("id") && product.searchMatches.Id
+                    ? highlightText(
+                        product.id.toString(),
+                        product.searchMatches.Id
+                      )
+                    : product.id.toString()}
                 </TableCell>
                 <TableCell>
-                  {highlightText(
-                    product.code,
-                    searchTerm,
-                    shouldHighlight("code")
-                  )}
+                  {shouldHighlight("code") && product.searchMatches.Code
+                    ? highlightText(product.code, product.searchMatches.Code)
+                    : product.code}
                 </TableCell>
                 <TableCell>
-                  {highlightText(
-                    product.name,
-                    searchTerm,
-                    shouldHighlight("name")
-                  )}
+                  {shouldHighlight("name") && product.searchMatches.Name
+                    ? highlightText(product.name, product.searchMatches.Name)
+                    : product.name}
                 </TableCell>
                 <TableCell>
-                  {highlightText(
-                    product.category,
-                    searchTerm,
-                    shouldHighlight("category")
-                  )}
+                  {shouldHighlight("category") && product.searchMatches.Category
+                    ? highlightText(
+                        product.category,
+                        product.searchMatches.Category
+                      )
+                    : product.category}
                 </TableCell>
                 <TableCell>
                   {product.brand &&
-                    highlightText(
-                      product.brand,
-                      searchTerm,
-                      shouldHighlight("brand")
-                    )}
+                    (shouldHighlight("brand") && product.searchMatches.Brand
+                      ? highlightText(
+                          product.brand,
+                          product.searchMatches.Brand
+                        )
+                      : product.brand)}
                 </TableCell>
                 <TableCell>
                   {product.type &&
-                    highlightText(
-                      product.type,
-                      searchTerm,
-                      shouldHighlight("type")
-                    )}
+                    (shouldHighlight("type") && product.searchMatches.Type
+                      ? highlightText(product.type, product.searchMatches.Type)
+                      : product.type)}
                 </TableCell>
                 <TableCell>
                   {product.description &&
-                    highlightText(
-                      product.description,
-                      searchTerm,
-                      shouldHighlight("description")
-                    )}
+                    (shouldHighlight("description") &&
+                    product.searchMatches.Description
+                      ? highlightText(
+                          product.description,
+                          product.searchMatches.Description
+                        )
+                      : product.description)}
                 </TableCell>
                 <TableCell>
                   <Button

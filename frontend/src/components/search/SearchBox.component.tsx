@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   TextField,
   Button,
@@ -18,21 +18,21 @@ const SearchBox: React.FC<ISearchBoxProps> = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchColumn, setSearchColumn] = useState<string>("all");
 
+  const handleSearch = useCallback(() => {
+    onSearch(searchTerm, searchColumn);
+  }, [searchTerm, searchColumn, onSearch]);
+
   useEffect(() => {
     const searchTimeout = setTimeout(() => {
       handleSearch();
-    }, 1000);
+    }, 2000);
 
     return () => clearTimeout(searchTimeout);
-  }, [searchTerm]);
+  }, [searchTerm, handleSearch]);
 
   useEffect(() => {
     handleSearch();
-  }, [searchColumn]);
-
-  const handleSearch = () => {
-    onSearch(searchTerm, searchColumn);
-  };
+  }, [searchColumn, handleSearch]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
