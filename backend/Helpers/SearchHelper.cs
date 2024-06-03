@@ -29,7 +29,7 @@ namespace backend.Helpers
 
                 return filteredQuery;
             }
-            else if (validColumns.Contains(searchColumn, StringComparer.OrdinalIgnoreCase))
+            if (validColumns.Contains(searchColumn, StringComparer.OrdinalIgnoreCase))
             {
                 var filteredQuery = query.Where(BuildSearchCondition(searchColumn), formattedSearch);
 
@@ -40,15 +40,13 @@ namespace backend.Helpers
 
                 return filteredQuery;
             }
-            else
-            {
-                throw new ArgumentException("Invalid search column");
-            }
+            throw new ArgumentException("Invalid search column");            
         }
 
         private void UpdateProductSearchMatches(Product product, string column, string search)
         {
-            string value = (product.GetType().GetProperty(column)?.GetValue(product, null)?.ToString()?.ToLower()) ?? "default";
+            string col = char.ToUpper(column[0]) + column.Substring(1);
+            string value = (product.GetType().GetProperty(col)?.GetValue(product, null)?.ToString()?.ToLower()) ?? "default";
             List<int> foundPositions = new List<int>();
 
             var words = value.Split(' ');

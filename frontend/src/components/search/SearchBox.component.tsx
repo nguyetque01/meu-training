@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   TextField,
   Button,
@@ -9,6 +9,7 @@ import {
   InputLabel,
   SelectChangeEvent,
 } from "@mui/material";
+import { useDebounce } from "../../hooks/useDebounce";
 
 interface ISearchBoxProps {
   onSearch: (searchTerm: string, searchColumn: string) => void;
@@ -18,21 +19,15 @@ const SearchBox: React.FC<ISearchBoxProps> = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchColumn, setSearchColumn] = useState<string>("all");
 
-  const handleSearch = useCallback(() => {
+  const handleSearch = useDebounce(() => {
     onSearch(searchTerm, searchColumn);
-  }, [searchTerm, searchColumn, onSearch]);
+  }, 2000);
 
-  useEffect(() => {
-    const searchTimeout = setTimeout(() => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
       handleSearch();
-    }, 2000);
-
-    return () => clearTimeout(searchTimeout);
-  }, [searchTerm, handleSearch]);
-
-  useEffect(() => {
-    handleSearch();
-  }, [searchColumn, handleSearch]);
+    }
+  };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -40,12 +35,6 @@ const SearchBox: React.FC<ISearchBoxProps> = ({ onSearch }) => {
 
   const handleColumnChange = (event: SelectChangeEvent<string>) => {
     setSearchColumn(event.target.value as string);
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      handleSearch();
-    }
   };
 
   return (

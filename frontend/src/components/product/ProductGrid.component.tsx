@@ -73,12 +73,15 @@ const ProductGrid = ({
         );
       }
     });
-
     return <span dangerouslySetInnerHTML={{ __html: highlightedText }} />;
   };
 
-  const shouldHighlight = (column: string) => {
-    return searchColumn === "all" || searchColumn === column;
+  const shouldHighlight = (product: IProduct, column: string) => {
+    var isMatchColumn = product.searchMatches.hasOwnProperty(column);
+    if (searchColumn === "all" || isMatchColumn) {
+      return true;
+    }
+    return false;
   };
 
   return (
@@ -101,7 +104,7 @@ const ProductGrid = ({
             {products?.map((product) => (
               <TableRow key={product.id}>
                 <TableCell>
-                  {shouldHighlight("id") && product.searchMatches.Id
+                  {shouldHighlight(product, "id") && product.searchMatches.Id
                     ? highlightText(
                         product.id.toString(),
                         product.searchMatches.Id
@@ -109,17 +112,20 @@ const ProductGrid = ({
                     : product.id.toString()}
                 </TableCell>
                 <TableCell>
-                  {shouldHighlight("code") && product.searchMatches.Code
+                  {shouldHighlight(product, "code") &&
+                  product.searchMatches.Code
                     ? highlightText(product.code, product.searchMatches.Code)
                     : product.code}
                 </TableCell>
                 <TableCell>
-                  {shouldHighlight("name") && product.searchMatches.Name
+                  {shouldHighlight(product, "name") &&
+                  product.searchMatches.Name
                     ? highlightText(product.name, product.searchMatches.Name)
                     : product.name}
                 </TableCell>
                 <TableCell>
-                  {shouldHighlight("category") && product.searchMatches.Category
+                  {shouldHighlight(product, "category") &&
+                  product.searchMatches.Category
                     ? highlightText(
                         product.category,
                         product.searchMatches.Category
@@ -128,7 +134,7 @@ const ProductGrid = ({
                 </TableCell>
                 <TableCell>
                   {product.brand &&
-                    (shouldHighlight("brand") && product.searchMatches.Brand
+                    (shouldHighlight(product, "brand")
                       ? highlightText(
                           product.brand,
                           product.searchMatches.Brand
@@ -137,13 +143,14 @@ const ProductGrid = ({
                 </TableCell>
                 <TableCell>
                   {product.type &&
-                    (shouldHighlight("type") && product.searchMatches.Type
+                    (shouldHighlight(product, "type") &&
+                    product.searchMatches.Type
                       ? highlightText(product.type, product.searchMatches.Type)
                       : product.type)}
                 </TableCell>
                 <TableCell>
                   {product.description &&
-                    (shouldHighlight("description") &&
+                    (shouldHighlight(product, "description") &&
                     product.searchMatches.Description
                       ? highlightText(
                           product.description,
