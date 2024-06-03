@@ -89,7 +89,6 @@ const Product = () => {
   const handleSearch = (searchTerm: string, searchColumn: string) => {
     setSearchTerm(searchTerm);
     setSearchColumn(searchColumn);
-    setPage(1);
   };
 
   return (
