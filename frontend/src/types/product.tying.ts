@@ -7,13 +7,13 @@ export interface IProduct {
   type?: string;
   description?: string;
   searchMatches: {
-    Id?: number[];
-    Code?: number[];
-    Name?: number[];
-    Category?: number[];
-    Brand?: number[];
-    Type?: number[];
-    Description?: number[];
+    id?: number[];
+    code?: number[];
+    name?: number[];
+    category?: number[];
+    brand?: number[];
+    type?: number[];
+    description?: number[];
   };
 }
 
