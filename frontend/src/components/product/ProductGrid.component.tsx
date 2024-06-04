@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Box,
   Button,
@@ -11,6 +12,9 @@ import {
   TableRow,
 } from "@mui/material";
 import { IProduct } from "../../types/product.tying";
+import { highlightText, shouldHighlight } from "../../utils/highlight.utils";
+import { capitalizeFirstLetter } from "../../utils/string.utils";
+import { productColumns } from "../../constants/product.contants";
 
 interface ProductGridProps {
   products: IProduct[];
@@ -19,10 +23,37 @@ interface ProductGridProps {
   totalProducts: number;
   searchTerm: string;
   searchColumn: string;
+  searchType: string;
   handleClickEditBtn: (code: string) => void;
   onChangePage: (newPage: number) => void;
   onChangePageSize: (newPageSize: number) => void;
 }
+
+const renderTableCell = (
+  product: IProduct,
+  field: keyof IProduct,
+  searchTerm: string,
+  searchType: string,
+  searchColumn: string
+) => {
+  const productField = product[field];
+  const matchField =
+    product.searchMatches[field as keyof IProduct["searchMatches"]];
+
+  return (
+    <TableCell key={field}>
+      {productField &&
+        (shouldHighlight(product, field as string, searchColumn) && matchField
+          ? highlightText(
+              productField.toString(),
+              matchField as number[],
+              searchTerm,
+              searchType
+            )
+          : productField.toString())}
+    </TableCell>
+  );
+};
 
 const ProductGrid = ({
   products,
@@ -31,6 +62,7 @@ const ProductGrid = ({
   totalProducts,
   searchTerm,
   searchColumn,
+  searchType,
   handleClickEditBtn,
   onChangePage,
   onChangePageSize,
@@ -46,111 +78,32 @@ const ProductGrid = ({
     onChangePage(1);
   };
 
-  const highlightText = (text: string, matches: number[]) => {
-    if (!matches || matches.length === 0) {
-      return text;
-    }
-
-    let highlightedText = text;
-    const words = highlightedText.split(" ");
-
-    matches.forEach((index) => {
-      let start = 0;
-      if (index > 0) {
-        for (let i = 0; i < index; i++) {
-          start += words[i].length + 1;
-        }
-      }
-
-      const end = start + searchTerm.length;
-
-      if (start >= 0 && start < end && end <= text.length) {
-        const word = text.substring(start, end);
-        const regexp = new RegExp(word, "g");
-        highlightedText = highlightedText.replace(
-          regexp,
-          `<span style="background-color: yellow;">${word}</span>`
-        );
-      }
-    });
-
-    return <span dangerouslySetInnerHTML={{ __html: highlightedText }} />;
-  };
-
-  const shouldHighlight = (column: string) => {
-    return searchColumn === "all" || searchColumn === column;
-  };
-
   return (
     <Box className="grid" sx={{ p: 2 }}>
       <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Code</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Brand</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>Description</TableCell>
+              {productColumns.map((column) => (
+                <TableCell key={column}>
+                  {capitalizeFirstLetter(column)}
+                </TableCell>
+              ))}
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {products?.map((product) => (
+            {products?.map((product: IProduct) => (
               <TableRow key={product.id}>
-                <TableCell>
-                  {shouldHighlight("id") && product.searchMatches.Id
-                    ? highlightText(
-                        product.id.toString(),
-                        product.searchMatches.Id
-                      )
-                    : product.id.toString()}
-                </TableCell>
-                <TableCell>
-                  {shouldHighlight("code") && product.searchMatches.Code
-                    ? highlightText(product.code, product.searchMatches.Code)
-                    : product.code}
-                </TableCell>
-                <TableCell>
-                  {shouldHighlight("name") && product.searchMatches.Name
-                    ? highlightText(product.name, product.searchMatches.Name)
-                    : product.name}
-                </TableCell>
-                <TableCell>
-                  {shouldHighlight("category") && product.searchMatches.Category
-                    ? highlightText(
-                        product.category,
-                        product.searchMatches.Category
-                      )
-                    : product.category}
-                </TableCell>
-                <TableCell>
-                  {product.brand &&
-                    (shouldHighlight("brand") && product.searchMatches.Brand
-                      ? highlightText(
-                          product.brand,
-                          product.searchMatches.Brand
-                        )
-                      : product.brand)}
-                </TableCell>
-                <TableCell>
-                  {product.type &&
-                    (shouldHighlight("type") && product.searchMatches.Type
-                      ? highlightText(product.type, product.searchMatches.Type)
-                      : product.type)}
-                </TableCell>
-                <TableCell>
-                  {product.description &&
-                    (shouldHighlight("description") &&
-                    product.searchMatches.Description
-                      ? highlightText(
-                          product.description,
-                          product.searchMatches.Description
-                        )
-                      : product.description)}
-                </TableCell>
+                {productColumns.map((field) =>
+                  renderTableCell(
+                    product,
+                    field as keyof IProduct,
+                    searchTerm,
+                    searchType,
+                    searchColumn
+                  )
+                )}
                 <TableCell>
                   <Button
                     aria-label="edit"
@@ -164,6 +117,7 @@ const ProductGrid = ({
               </TableRow>
             ))}
           </TableBody>
+
           <TableFooter>
             <TableRow>
               <TablePagination

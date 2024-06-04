@@ -17,13 +17,13 @@ namespace backend.Repositories
             _searchHelper = searchHelper;
         }
 
-        public async Task<(int totalCount, IEnumerable<Product> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "")
+        public async Task<(int totalCount, IEnumerable<Product> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "")
         {
             var query = _context.Products.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                query = _searchHelper.ApplyProductSearchFilter(query, search, searchColumn);
+                query = _searchHelper.ApplyProductSearchFilter(query, search, searchColumn, searchType);
             }
 
             var totalCount = await query.CountAsync();

@@ -16,14 +16,13 @@ const ProductService = {
     sort: string = "id",
     dir: string = "asc",
     search: string = "",
-    searchColumn: string = "all"
+    searchColumn: string = "all",
+    searchType: string = "partial"
   ): Promise<{ items: IProduct[]; totalCount: number }> => {
     try {
       let endpoint = `${API_ENDPOINT}?page=${page}&size=${size}&sort=${sort}&dir=${dir}`;
-      if (search && searchColumn !== "all") {
-        endpoint += `&search=${search}&searchColumn=${searchColumn}`;
-      } else if (search) {
-        endpoint += `&search=${search}`;
+      if (search) {
+        endpoint += `&search=${search}&searchColumn=${searchColumn}&searchType=${searchType}`;
       }
 
       const response = await httpModule.get<
@@ -36,6 +35,7 @@ const ProductService = {
       if (response.data.status === "success") {
         return response.data.responseData;
       }
+
       throw new Error(response.data.message);
     } catch (error) {
       throw new Error("Failed to fetch products");
@@ -93,4 +93,3 @@ const ProductService = {
 };
 
 export default ProductService;
-//
