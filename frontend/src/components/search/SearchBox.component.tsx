@@ -8,7 +8,7 @@ import {
   InputLabel,
   SelectChangeEvent,
 } from "@mui/material";
-import { Debounce } from "../../utils/debounce.utils";
+import { Debounce } from "../../utils/debounce";
 import { productColumns } from "../../constants/product.contants";
 import { capitalizeFirstLetter } from "../../utils/string.utils";
 
