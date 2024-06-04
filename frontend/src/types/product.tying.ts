@@ -6,7 +6,15 @@ export interface IProduct {
   brand?: string;
   type?: string;
   description?: string;
-  searchMatches: { [key: string]: number[] };
+  searchMatches: {
+    Id?: number[];
+    Code?: number[];
+    Name?: number[];
+    Category?: number[];
+    Brand?: number[];
+    Type?: number[];
+    Description?: number[];
+  };
 }
 
 export interface ICreateProduct {

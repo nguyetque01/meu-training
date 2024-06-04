@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   TextField,
-  Button,
   Box,
   MenuItem,
   Select,
@@ -9,25 +8,24 @@ import {
   InputLabel,
   SelectChangeEvent,
 } from "@mui/material";
-import { useDebounce } from "../../hooks/useDebounce";
+import { Debounce } from "../../utils/debounce";
 
 interface ISearchBoxProps {
-  onSearch: (searchTerm: string, searchColumn: string) => void;
+  onSearch: (
+    searchTerm: string,
+    searchColumn: string,
+    searchType: string
+  ) => void;
 }
 
 const SearchBox: React.FC<ISearchBoxProps> = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchColumn, setSearchColumn] = useState<string>("all");
+  const [searchType, setSearchType] = useState<string>("partial");
 
-  const handleSearch = useDebounce(() => {
-    onSearch(searchTerm, searchColumn);
+  Debounce(() => {
+    onSearch(searchTerm, searchColumn, searchType);
   }, 2000);
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      handleSearch();
-    }
-  };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -36,10 +34,13 @@ const SearchBox: React.FC<ISearchBoxProps> = ({ onSearch }) => {
   const handleColumnChange = (event: SelectChangeEvent<string>) => {
     setSearchColumn(event.target.value as string);
   };
+  const handleSearchTypeChange = (event: SelectChangeEvent<string>) => {
+    setSearchType(event.target.value as string);
+  };
 
   return (
     <Box display="flex" alignItems="center">
-      <FormControl variant="outlined" sx={{ minWidth: 220, mr: 2 }}>
+      <FormControl variant="outlined" sx={{ minWidth: 200, mr: 2 }}>
         <InputLabel>Column</InputLabel>
         <Select
           value={searchColumn}
@@ -56,17 +57,26 @@ const SearchBox: React.FC<ISearchBoxProps> = ({ onSearch }) => {
           <MenuItem value="description">Description</MenuItem>
         </Select>
       </FormControl>
+
       <TextField
         label="Search"
         value={searchTerm}
         onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
         variant="outlined"
         sx={{ mr: 2, width: "100%" }}
       />
-      <Button variant="contained" onClick={handleSearch}>
-        Search
-      </Button>
+
+      <FormControl variant="outlined" sx={{ minWidth: 200, mr: 2 }}>
+        <InputLabel>Search Type</InputLabel>
+        <Select
+          value={searchType}
+          onChange={handleSearchTypeChange}
+          label="Search Type"
+        >
+          <MenuItem value="partial">Partial</MenuItem>
+          <MenuItem value="exact">Exact</MenuItem>
+        </Select>
+      </FormControl>
     </Box>
   );
 };

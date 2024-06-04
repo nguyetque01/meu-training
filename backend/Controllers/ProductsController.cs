@@ -25,14 +25,15 @@ namespace backend.Controllers
             [FromQuery] string sort = "id",
             [FromQuery] string dir = "asc",
             [FromQuery] string search = "",
-            [FromQuery] string searchColumn = "all")
+            [FromQuery] string searchColumn = "all",
+            [FromQuery] string searchType = "partial")
         {
             try
             {
                 if (page <= 0) page = 1;
                 if (size <= 0) size = 5;
 
-                var (totalItems, pagedResult) = await _productRepository.GetProductsAsync(page, size, sort, dir, search, searchColumn);
+                var (totalItems, pagedResult) = await _productRepository.GetProductsAsync(page, size, sort, dir, search, searchColumn, searchType);
 
                 return _responseHelper.CreateResponse("Products retrieved successfully", new { items = pagedResult, totalCount = totalItems }, "success");
             }

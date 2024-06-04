@@ -23,6 +23,7 @@ const Product = () => {
   const [totalProducts, setTotalProducts] = useState<number>(0);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchColumn, setSearchColumn] = useState<string>("all");
+  const [searchType, setSearchType] = useState<string>("partial");
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -33,8 +34,10 @@ const Product = () => {
         undefined,
         undefined,
         searchTerm,
-        searchColumn
+        searchColumn,
+        searchType
       );
+
       if (!productData || !productData.items) {
         console.error("Product data or items is undefined");
       } else {
@@ -47,7 +50,7 @@ const Product = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, searchTerm, searchColumn]);
+  }, [page, pageSize, searchTerm, searchColumn, searchType]);
 
   useEffect(() => {
     fetchProducts();
@@ -86,9 +89,14 @@ const Product = () => {
     setPageSize(newPageSize);
   };
 
-  const handleSearch = (searchTerm: string, searchColumn: string) => {
+  const handleSearch = (
+    searchTerm: string,
+    searchColumn: string,
+    searchType: string
+  ) => {
     setSearchTerm(searchTerm);
     setSearchColumn(searchColumn);
+    setSearchType(searchType);
   };
 
   return (
@@ -144,6 +152,7 @@ const Product = () => {
               totalProducts={totalProducts}
               searchTerm={searchTerm}
               searchColumn={searchColumn}
+              searchType={searchType}
               onChangePage={handleChangePage}
               onChangePageSize={handleChangePageSize}
             />
