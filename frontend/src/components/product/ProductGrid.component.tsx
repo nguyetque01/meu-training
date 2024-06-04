@@ -12,7 +12,9 @@ import {
   TableRow,
 } from "@mui/material";
 import { IProduct } from "../../types/product.tying";
-import { highlightText, shouldHighlight } from "../../utils/highlightUtils";
+import { highlightText, shouldHighlight } from "../../utils/highlight.utils";
+import { capitalizeFirstLetter } from "../../utils/string.utils";
+import { productColumns } from "../../constants/product.contants";
 
 interface ProductGridProps {
   products: IProduct[];
@@ -65,16 +67,6 @@ const ProductGrid = ({
   onChangePage,
   onChangePageSize,
 }: ProductGridProps) => {
-  const validColumns = [
-    "id",
-    "code",
-    "name",
-    "category",
-    "brand",
-    "type",
-    "description",
-  ];
-
   const handleChangePage = (event: unknown, newPage: number) => {
     onChangePage(newPage + 1);
   };
@@ -92,20 +84,18 @@ const ProductGrid = ({
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Code</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Brand</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>Description</TableCell>
+              {productColumns.map((column) => (
+                <TableCell key={column}>
+                  {capitalizeFirstLetter(column)}
+                </TableCell>
+              ))}
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {products?.map((product: IProduct) => (
               <TableRow key={product.id}>
-                {validColumns.map((field) =>
+                {productColumns.map((field) =>
                   renderTableCell(
                     product,
                     field as keyof IProduct,

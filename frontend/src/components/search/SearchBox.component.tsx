@@ -8,7 +8,9 @@ import {
   InputLabel,
   SelectChangeEvent,
 } from "@mui/material";
-import { Debounce } from "../../utils/debounce";
+import { Debounce } from "../../utils/debounce.utils";
+import { productColumns } from "../../constants/product.contants";
+import { capitalizeFirstLetter } from "../../utils/string.utils";
 
 interface ISearchBoxProps {
   onSearch: (
@@ -48,13 +50,11 @@ const SearchBox: React.FC<ISearchBoxProps> = ({ onSearch }) => {
           label="Column"
         >
           <MenuItem value="all">All</MenuItem>
-          <MenuItem value="id">ID</MenuItem>
-          <MenuItem value="code">Code</MenuItem>
-          <MenuItem value="name">Name</MenuItem>
-          <MenuItem value="category">Category</MenuItem>
-          <MenuItem value="brand">Brand</MenuItem>
-          <MenuItem value="type">Type</MenuItem>
-          <MenuItem value="description">Description</MenuItem>
+          {productColumns.map((column) => (
+            <MenuItem key={column} value={column}>
+              {capitalizeFirstLetter(column)}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 

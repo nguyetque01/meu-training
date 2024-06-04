@@ -22,7 +22,6 @@ export const highlightText = (
   }
 
   let highlightedText = text;
-  const escapedSearchTerm = escapeRegExp(searchTerm);
 
   if (searchType === "exact") {
     const words = highlightedText.split(" ");
@@ -47,7 +46,7 @@ export const highlightText = (
     });
   } else {
     highlightedText = highlightedText.replace(
-      new RegExp(`(${escapedSearchTerm})`, "gi"),
+      new RegExp(escapeRegExp(searchTerm), "gi"),
       (match) => highlight(match)
     );
   }
