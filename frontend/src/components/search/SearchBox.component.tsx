@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { productColumns } from "../../constants/product.contants";
 import { capitalizeFirstLetter } from "../../utils/string.utils";
+import { useDebounce } from "../../hooks/debounce";
 
 interface ISearchBoxProps {
   onSearch: (
@@ -24,18 +25,23 @@ const SearchBox: React.FC<ISearchBoxProps> = ({ onSearch }) => {
   const [searchColumn, setSearchColumn] = useState<string>("all");
   const [searchType, setSearchType] = useState<string>("partial");
 
+  const debouncedOnSearch = useDebounce(onSearch, 2000);
+
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-    onSearch(event.target.value, searchColumn, searchType);
+    const value = event.target.value;
+    setSearchTerm(value);
+    debouncedOnSearch(value, searchColumn, searchType);
   };
 
   const handleColumnChange = (event: SelectChangeEvent<string>) => {
-    setSearchColumn(event.target.value as string);
-    onSearch(searchTerm, event.target.value, searchType);
+    const value = event.target.value;
+    setSearchColumn(value as string);
+    onSearch(searchTerm, value, searchType);
   };
   const handleSearchTypeChange = (event: SelectChangeEvent<string>) => {
-    setSearchType(event.target.value as string);
-    onSearch(searchTerm, searchColumn, event.target.value);
+    const value = event.target.value;
+    setSearchType(value as string);
+    onSearch(searchTerm, searchColumn, value);
   };
 
   return (

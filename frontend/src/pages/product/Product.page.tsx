@@ -12,7 +12,6 @@ import ProductForm from "../../components/product/ProductForm.component";
 import ProductGrid from "../../components/product/ProductGrid.component";
 import ProductService from "../../services/ProductService";
 import SearchBox from "../../components/search/SearchBox.component";
-import { useDebounce } from "../../hooks/debounce";
 
 const Product = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -90,16 +89,15 @@ const Product = () => {
     setPageSize(newPageSize);
   };
 
-  const handleSearch = useCallback(
-    (term: string, column: string, type: string) => {
-      setSearchTerm(term);
-      setSearchColumn(column);
-      setSearchType(type);
-    },
-    [setSearchTerm, setSearchColumn, setSearchType]
-  );
-
-  const debouncedHandleSearch = useDebounce(handleSearch, 2000);
+  const handleSearch = (
+    searchTerm: string,
+    searchColumn: string,
+    searchType: string
+  ) => {
+    setSearchTerm(searchTerm);
+    setSearchColumn(searchColumn);
+    setSearchType(searchType);
+  };
 
   return (
     <Paper className="content">
@@ -135,7 +133,7 @@ const Product = () => {
       ) : (
         <>
           <Box sx={{ p: 2 }}>
-            <SearchBox onSearch={debouncedHandleSearch} />
+            <SearchBox onSearch={handleSearch} />
           </Box>
           {loading ? (
             <Box sx={{ p: 2, textAlign: "center" }}>
