@@ -12,6 +12,7 @@ import ProductForm from "../../components/product/ProductForm.component";
 import ProductGrid from "../../components/product/ProductGrid.component";
 import ProductService from "../../services/ProductService";
 import SearchBox from "../../components/search/SearchBox.component";
+import DeleteDialog from "../../components/dialog/DeleteDialog.component";
 
 const Product = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -24,6 +25,8 @@ const Product = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchColumn, setSearchColumn] = useState<string>("all");
   const [searchType, setSearchType] = useState<string>("partial");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
+  const [deleteProductCode, setDeleteProductCode] = useState<string>("");
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -60,6 +63,10 @@ const Product = () => {
 
   const closeForm = () => setIsFormOpen(false);
 
+  const openDeleteDialog = () => setIsDeleteDialogOpen(true);
+
+  const closeDeleteDialog = () => setIsDeleteDialogOpen(false);
+
   const handleClickAddBtn = () => {
     setProductCode("");
     setIsFormOpen((prev) => !prev);
@@ -68,6 +75,25 @@ const Product = () => {
   const handleClickEditBtn = (productCode: string) => {
     setProductCode(productCode);
     openForm();
+  };
+
+  const handleClickDeleteBtn = async (productCode: string) => {
+    setDeleteProductCode(productCode);
+    openDeleteDialog();
+  };
+
+  const deleteProduct = async () => {
+    try {
+      await ProductService.deleteProduct(deleteProductCode);
+      closeDeleteDialog();
+      toast.success("Product deleted successfully!");
+      fetchProducts();
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast.error("Error deleting product. Please try again.");
+    } finally {
+      closeDeleteDialog();
+    }
   };
 
   const handleSaveSuccess = async (newProductCode: string) => {
@@ -147,17 +173,24 @@ const Product = () => {
           ) : (
             <ProductGrid
               products={products}
-              handleClickEditBtn={handleClickEditBtn}
               page={page}
               pageSize={pageSize}
               totalProducts={totalProducts}
               searchTerm={searchTerm}
               searchColumn={searchColumn}
               searchType={searchType}
+              handleClickEditBtn={handleClickEditBtn}
+              handleClickDeleteBtn={handleClickDeleteBtn}
               onChangePage={handleChangePage}
               onChangePageSize={handleChangePageSize}
             />
           )}
+          <DeleteDialog
+            item={"product"}
+            isOpen={isDeleteDialogOpen}
+            handleClose={() => setIsDeleteDialogOpen(false)}
+            handleConfirm={deleteProduct}
+          />
         </>
       )}
     </Paper>
