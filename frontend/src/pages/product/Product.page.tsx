@@ -97,6 +97,7 @@ const Product = () => {
     setSearchTerm(searchTerm);
     setSearchColumn(searchColumn);
     setSearchType(searchType);
+    setPage(1);
   };
 
   return (
