@@ -25,6 +25,7 @@ interface ProductGridProps {
   searchColumn: string;
   searchType: string;
   handleClickEditBtn: (code: string) => void;
+  handleClickDeleteBtn: (code: string) => void;
   onChangePage: (newPage: number) => void;
   onChangePageSize: (newPageSize: number) => void;
 }
@@ -64,6 +65,7 @@ const ProductGrid = ({
   searchColumn,
   searchType,
   handleClickEditBtn,
+  handleClickDeleteBtn,
   onChangePage,
   onChangePageSize,
 }: ProductGridProps) => {
@@ -105,14 +107,33 @@ const ProductGrid = ({
                   )
                 )}
                 <TableCell>
-                  <Button
-                    aria-label="edit"
-                    size="small"
-                    color="secondary"
-                    onClick={() => handleClickEditBtn(product.code)}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
                   >
-                    Edit
-                  </Button>
+                    <Button
+                      aria-label="edit"
+                      size="small"
+                      color="secondary"
+                      variant="outlined"
+                      sx={{ mr: 1 }}
+                      onClick={() => handleClickEditBtn(product.code)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      aria-label="delete"
+                      size="small"
+                      color="error"
+                      variant="outlined"
+                      onClick={() => handleClickDeleteBtn(product.code)}
+                    >
+                      Delete
+                    </Button>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}
