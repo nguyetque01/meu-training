@@ -3,6 +3,7 @@ using System.Linq.Dynamic.Core;
 using backend.Models;
 using backend.Helpers;
 using System.Text.RegularExpressions;
+using backend.DTOs;
 
 namespace backend.Repositories
 {
@@ -10,6 +11,7 @@ namespace backend.Repositories
     {
         private readonly MeuTrainingContext _context;
         private readonly SearchHelper _searchHelper;
+        private List<string> validColumns = new List<string> { "id", "code", "name", "category", "brand", "type", "description" };
 
         public ProductRepository(MeuTrainingContext context, SearchHelper searchHelper)
         {
@@ -17,9 +19,22 @@ namespace backend.Repositories
             _searchHelper = searchHelper;
         }
 
-        public async Task<(int totalCount, IEnumerable<Product> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "")
+        public async Task<(int totalCount, IEnumerable<ProductDto> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "")
         {
-            var query = _context.Products.AsQueryable();
+            var query = _context.Products
+                .Include(p => p.Brand)
+                .Include(p => p.Type)
+                .Select(p => new ProductDto
+                {
+                    Id = p.Id,
+                    Code = p.Code,
+                    Name = p.Name,
+                    Category = p.Category,
+                    Brand = p.Brand != null ? p.Brand.Name : "Null",
+                    Type = p.Type != null ? p.Type.Name : "Null",
+                    Description = p.Description
+                })
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -32,12 +47,31 @@ namespace backend.Repositories
                                       .Take(size)
                                       .ToListAsync();
 
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                _searchHelper.UpdateProductSearchResults(products, search, searchColumn, searchType);
+            }
+
             return (totalCount, products);
         }
 
-        public async Task<Product> GetProductByCodeAsync(string code)
+        public async Task<ProductDto> GetProductByCodeAsync(string code)
         {
-            var product = await _context.Products.FirstOrDefaultAsync(p => p.Code == code);
+            var product = await _context.Products
+                .Include(p => p.Brand)
+                .Include(p => p.Type)
+                .Select(p => new ProductDto
+                {
+                    Id = p.Id,
+                    Code = p.Code,
+                    Name = p.Name,
+                    Category = p.Category,
+                    Brand = p.Brand != null ? p.Brand.Name : "Null",
+                    Type = p.Type != null ? p.Type.Name : "Null",
+                    Description = p.Description
+                })
+                .FirstOrDefaultAsync(p => p.Code == code);
+
             if (product == null)
             {
                 throw new InvalidOperationException("Product not found");

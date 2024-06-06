@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using backend.DTOs;
 using backend.Models;
 using Microsoft.IdentityModel.Tokens;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace backend.Helpers
 {
@@ -12,43 +14,55 @@ namespace backend.Helpers
         private char[] punctuationMarks = { ' ', '-', ':', ',', '.', '?', '!' };
         private List<string> validColumns = new List<string> { "id", "code", "name", "category", "brand", "type", "description" };
 
-        public IQueryable<Product> ApplyProductSearchFilter(IQueryable<Product> query, string search, string searchColumn, string searchType)
+        private bool IsAllColumnsSearch(string searchColumn)
+        {
+            return string.IsNullOrEmpty(searchColumn) || searchColumn.Equals("all", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private bool IsValidSearchColumn(string searchColumn)
+        {
+            return validColumns.Contains(searchColumn, StringComparer.OrdinalIgnoreCase);
+        }
+
+        public IQueryable<ProductDto> ApplyProductSearchFilter(IQueryable<ProductDto> query, string search, string searchColumn, string searchType)
         {
             string formattedSearch = search.ToLower();
 
-            if (string.IsNullOrEmpty(searchColumn) || searchColumn.Equals("all", StringComparison.OrdinalIgnoreCase))
+            if (IsAllColumnsSearch(searchColumn) || IsValidSearchColumn(searchColumn))
             {
-                var filteredQuery = query.Where(BuildSearchCondition(null, searchType), formattedSearch);
-
-                foreach (var product in filteredQuery.ToList())
-                {
-                    foreach (var column in validColumns)
-                    {
-                        UpdateProductSearchMatches(product, column, formattedSearch, searchType);
-                    }
-                }
-
-                return filteredQuery;
-            }
-
-            if (validColumns.Contains(searchColumn, StringComparer.OrdinalIgnoreCase))
-            {
-                var filteredQuery = query.Where(BuildSearchCondition(searchColumn, searchType), formattedSearch);
-
-                foreach (var product in filteredQuery.ToList())
-                {
-                    UpdateProductSearchMatches(product, searchColumn, formattedSearch, searchType);
-                }
-
-                return filteredQuery;
-            }
+                return query.Where(BuildSearchCondition(searchColumn, searchType), formattedSearch);
+            }        
 
             throw new ArgumentException("Invalid search column");            
         }
 
-        private void UpdateProductSearchMatches(Product product, string column, string search, string searchType)
+        public void UpdateProductSearchResults(List<ProductDto> products, string search, string searchColumn, string searchType)
         {
-            string col = char.ToUpper(column[0]) + column.Substring(1);
+            string formattedSearch = search.ToLower();
+
+            if (IsAllColumnsSearch(searchColumn)) 
+            {
+                foreach (var product in products)
+                {
+                    foreach (var column in validColumns)
+                    {
+                        UpdateProductSearchMatches(product, formattedSearch, column, searchType);
+                    }
+                }
+            }
+
+            if (IsValidSearchColumn(searchColumn))
+            {
+                foreach (var product in products)
+                {
+                    UpdateProductSearchMatches(product, formattedSearch, searchColumn, searchType);
+                }
+            }
+        }
+
+        private void UpdateProductSearchMatches(ProductDto product, string search, string searchColumn, string searchType)
+        {
+            string col = char.ToUpper(searchColumn[0]) + searchColumn.Substring(1);
             string value = (product.GetType().GetProperty(col)?.GetValue(product, null)?.ToString()?.ToLower()) ?? "default";
             List<int> foundPositions = new List<int>();
 
@@ -69,22 +83,22 @@ namespace backend.Helpers
 
             if (foundPositions.Any())
             {
-                if (!product.SearchMatches.ContainsKey(column))
+                if (!product.SearchMatches.ContainsKey(searchColumn))
                 {
-                    product.SearchMatches[column] = foundPositions;
+                    product.SearchMatches[searchColumn] = foundPositions;
                 }
                 else
                 {
-                    product.SearchMatches[column].AddRange(foundPositions);
+                    product.SearchMatches[searchColumn].AddRange(foundPositions);
                 }
             }
         }
 
-        private string BuildSearchCondition(string? column = null, string searchType = "")
+        private string BuildSearchCondition(string column, string searchType = "")
         {
             List<string> conditions = new List<string>();
 
-            if (column == null)
+            if (IsAllColumnsSearch(column))
             {
                 foreach (string col in validColumns)
                 {
