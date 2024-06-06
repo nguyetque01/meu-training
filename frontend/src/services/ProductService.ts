@@ -1,11 +1,6 @@
 import httpModule from "../helpers/http.module";
+import { ApiResponse } from "../types/global.typing";
 import { IProduct, IProductDto, ICreateProduct } from "../types/product.tying";
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  responseData: T;
-  timeStamp: string;
-}
 
 const API_ENDPOINT = "/products";
 
@@ -42,10 +37,25 @@ const ProductService = {
     }
   },
 
-  getProductByCode: async (code: string): Promise<IProductDto> => {
+  getProductByCode: async (code: string): Promise<IProduct> => {
+    try {
+      const response = await httpModule.get<ApiResponse<IProduct>>(
+        `${API_ENDPOINT}/${code}`
+      );
+
+      if (response.data.status === "success") {
+        return response.data.responseData;
+      }
+      throw new Error(response.data.message);
+    } catch (error) {
+      throw new Error("Failed to fetch product");
+    }
+  },
+
+  getProductDetailByCode: async (code: string): Promise<IProductDto> => {
     try {
       const response = await httpModule.get<ApiResponse<IProductDto>>(
-        `${API_ENDPOINT}/${code}`
+        `${API_ENDPOINT}/detail/${code}`
       );
 
       if (response.data.status === "success") {

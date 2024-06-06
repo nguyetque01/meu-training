@@ -87,7 +87,7 @@ const Product = () => {
       await ProductService.deleteProduct(deleteProductCode);
       closeDeleteDialog();
       toast.success("Product deleted successfully!");
-      fetchProducts();
+      setPage(1);
     } catch (error) {
       console.error("Error deleting product:", error);
       toast.error("Error deleting product. Please try again.");

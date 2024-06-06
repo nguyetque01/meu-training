@@ -62,6 +62,25 @@ namespace backend.Controllers
             }
         }
 
+        // GET: api/products/detail/code
+        [HttpGet("detail/{code}")]
+        public async Task<IActionResult> GetProductDetail(string code)
+        {
+            try
+            {
+                var product = await _productRepository.GetProductDetailByCodeAsync(code);
+                if (product == null)
+                {
+                    return _responseHelper.CreateResponse("Product not found", null, "fail");
+                }
+                return _responseHelper.CreateResponse("Product retrieved successfully", product, "success");
+            }
+            catch (Exception ex)
+            {
+                return _responseHelper.CreateResponse($"An error occurred: {ex.Message}", null, "fail");
+            }
+        }
+
         // POST: api/products
         [HttpPost]
         public async Task<IActionResult> AddProduct(Product product)
