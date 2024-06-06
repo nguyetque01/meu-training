@@ -7,11 +7,20 @@ using backend.DTOs;
 
 namespace backend.Repositories
 {
+    public interface IProductRepository
+    {
+        Task<(int totalCount, IEnumerable<ProductDto> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "");
+        Task<Product> GetProductByCodeAsync(string code);
+        Task<ProductDto> GetProductDetailByCodeAsync(string code);
+        Task<bool> AddProductAsync(Product product);
+        Task<bool> UpdateProductAsync(Product product);
+        Task<bool> DeleteProductAsync(string code);
+        Task<bool> ProductExistsAsync(string code);
+    }
     public class ProductRepository : IProductRepository
     {
         private readonly MeuTrainingContext _context;
         private readonly SearchHelper _searchHelper;
-        private List<string> validColumns = new List<string> { "id", "code", "name", "category", "brand", "type", "description" };
 
         public ProductRepository(MeuTrainingContext context, SearchHelper searchHelper)
         {
@@ -55,7 +64,18 @@ namespace backend.Repositories
             return (totalCount, products);
         }
 
-        public async Task<ProductDto> GetProductByCodeAsync(string code)
+        public async Task<Product> GetProductByCodeAsync(string code)
+        {
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.Code == code);
+
+            if (product == null)
+            {
+                throw new InvalidOperationException("Product not found");
+            }
+            return product;
+        }
+
+        public async Task<ProductDto> GetProductDetailByCodeAsync(string code)
         {
             var product = await _context.Products
                 .Include(p => p.Brand)

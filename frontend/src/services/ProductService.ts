@@ -1,11 +1,6 @@
 import httpModule from "../helpers/http.module";
-import { IProduct, ICreateProduct } from "../types/product.tying";
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  responseData: T;
-  timeStamp: string;
-}
+import { ApiResponse } from "../types/global.typing";
+import { IProduct, IProductDto, ICreateProduct } from "../types/product.tying";
 
 const API_ENDPOINT = "/products";
 
@@ -18,7 +13,7 @@ const ProductService = {
     search: string = "",
     searchColumn: string = "all",
     searchType: string = "partial"
-  ): Promise<{ items: IProduct[]; totalCount: number }> => {
+  ): Promise<{ items: IProductDto[]; totalCount: number }> => {
     try {
       let endpoint = `${API_ENDPOINT}?page=${page}&size=${size}&sort=${sort}&dir=${dir}`;
       if (search) {
@@ -27,7 +22,7 @@ const ProductService = {
 
       const response = await httpModule.get<
         ApiResponse<{
-          items: IProduct[];
+          items: IProductDto[];
           totalCount: number;
         }>
       >(endpoint);
@@ -46,6 +41,21 @@ const ProductService = {
     try {
       const response = await httpModule.get<ApiResponse<IProduct>>(
         `${API_ENDPOINT}/${code}`
+      );
+
+      if (response.data.status === "success") {
+        return response.data.responseData;
+      }
+      throw new Error(response.data.message);
+    } catch (error) {
+      throw new Error("Failed to fetch product");
+    }
+  },
+
+  getProductDetailByCode: async (code: string): Promise<IProductDto> => {
+    try {
+      const response = await httpModule.get<ApiResponse<IProductDto>>(
+        `${API_ENDPOINT}/detail/${code}`
       );
 
       if (response.data.status === "success") {

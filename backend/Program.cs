@@ -18,6 +18,8 @@ builder.Services.AddDbContext<MeuTrainingContext>(options =>
 });
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IBrandRepository, BrandRepository>();
+builder.Services.AddScoped<ITypeRepository, TypeRepository>();
 builder.Services.AddScoped<ResponseHelper>();
 builder.Services.AddScoped<SearchHelper>();
 

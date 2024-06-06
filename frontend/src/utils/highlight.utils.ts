@@ -1,9 +1,9 @@
 import React from "react";
 
-import { IProduct } from "../types/product.tying";
+import { IProductDto } from "../types/product.tying";
 
 export const shouldHighlight = (
-  product: IProduct,
+  product: IProductDto,
   column: string,
   searchColumn: string
 ) => {
