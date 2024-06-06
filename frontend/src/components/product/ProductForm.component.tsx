@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import ProductService from "../../services/ProductService";
 import { toast } from "react-toastify";
-import { mapProductDtoToCreateProduct } from "../../utils/mappers.utils";
 import { IBrand } from "../../types/brand.tying";
 import { IType } from "../../types/type.tying";
 import BrandService from "../../services/BrandService";
