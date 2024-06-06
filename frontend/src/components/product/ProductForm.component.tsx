@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import ProductService from "../../services/ProductService";
 import { toast } from "react-toastify";
+import { mapProductDtoToCreateProduct } from "../../utils/mappers";
 
 interface IProductFormProps {
   handleClickCancelBtn: () => void;
@@ -25,8 +26,8 @@ const ProductForm = ({
     code: "",
     name: "",
     category: "",
-    brand: "",
-    type: "",
+    brandId: 0,
+    typeId: 0,
     description: "",
   });
 
@@ -37,7 +38,8 @@ const ProductForm = ({
     if (isEditing) {
       try {
         const data = await ProductService.getProductByCode(productCode);
-        setProduct(data);
+        const editingData = mapProductDtoToCreateProduct(data);
+        setProduct(editingData);
       } catch (error) {
         console.error("Error to fetch product data:", error);
         toast.error("Error to fetch product data.");
@@ -59,7 +61,6 @@ const ProductForm = ({
 
   const handleClickSaveBtn = () => {
     setLoading(true);
-
     const savePromise = isEditing
       ? ProductService.updateProduct(productCode, product)
       : ProductService.createProduct(product);
@@ -122,8 +123,8 @@ const ProductForm = ({
                 fullWidth
                 label="Brand"
                 variant="outlined"
-                value={product.brand}
-                onChange={(e) => handleInputChange("brand", e.target.value)}
+                value={product.brandId}
+                onChange={(e) => handleInputChange("brandId", e.target.value)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -131,8 +132,8 @@ const ProductForm = ({
                 fullWidth
                 label="Type"
                 variant="outlined"
-                value={product.type}
-                onChange={(e) => handleInputChange("type", e.target.value)}
+                value={product.typeId}
+                onChange={(e) => handleInputChange("typeId", e.target.value)}
               />
             </Grid>
             <Grid item xs={12}>

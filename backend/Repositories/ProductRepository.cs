@@ -11,7 +11,6 @@ namespace backend.Repositories
     {
         private readonly MeuTrainingContext _context;
         private readonly SearchHelper _searchHelper;
-        private List<string> validColumns = new List<string> { "id", "code", "name", "category", "brand", "type", "description" };
 
         public ProductRepository(MeuTrainingContext context, SearchHelper searchHelper)
         {

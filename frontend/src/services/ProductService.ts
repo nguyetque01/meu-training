@@ -1,5 +1,5 @@
 import httpModule from "../helpers/http.module";
-import { IProduct, ICreateProduct } from "../types/product.tying";
+import { IProduct, IProductDto, ICreateProduct } from "../types/product.tying";
 interface ApiResponse<T> {
   status: string;
   message: string;
@@ -18,7 +18,7 @@ const ProductService = {
     search: string = "",
     searchColumn: string = "all",
     searchType: string = "partial"
-  ): Promise<{ items: IProduct[]; totalCount: number }> => {
+  ): Promise<{ items: IProductDto[]; totalCount: number }> => {
     try {
       let endpoint = `${API_ENDPOINT}?page=${page}&size=${size}&sort=${sort}&dir=${dir}`;
       if (search) {
@@ -27,7 +27,7 @@ const ProductService = {
 
       const response = await httpModule.get<
         ApiResponse<{
-          items: IProduct[];
+          items: IProductDto[];
           totalCount: number;
         }>
       >(endpoint);
@@ -42,9 +42,9 @@ const ProductService = {
     }
   },
 
-  getProductByCode: async (code: string): Promise<IProduct> => {
+  getProductByCode: async (code: string): Promise<IProductDto> => {
     try {
-      const response = await httpModule.get<ApiResponse<IProduct>>(
+      const response = await httpModule.get<ApiResponse<IProductDto>>(
         `${API_ENDPOINT}/${code}`
       );
 

@@ -11,13 +11,13 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import { IProduct } from "../../types/product.tying";
+import { IProductDto } from "../../types/product.tying";
 import { highlightText, shouldHighlight } from "../../utils/highlight.utils";
 import { capitalizeFirstLetter } from "../../utils/string.utils";
 import { productColumns } from "../../constants/product.contants";
 
 interface ProductGridProps {
-  products: IProduct[];
+  products: IProductDto[];
   page: number;
   pageSize: number;
   totalProducts: number;
@@ -31,15 +31,15 @@ interface ProductGridProps {
 }
 
 const renderTableCell = (
-  product: IProduct,
-  field: keyof IProduct,
+  product: IProductDto,
+  field: keyof IProductDto,
   searchTerm: string,
   searchType: string,
   searchColumn: string
 ) => {
   const productField = product[field];
   const matchField =
-    product.searchMatches[field as keyof IProduct["searchMatches"]];
+    product.searchMatches[field as keyof IProductDto["searchMatches"]];
 
   return (
     <TableCell key={field}>
@@ -95,12 +95,12 @@ const ProductGrid = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {products?.map((product: IProduct) => (
+            {products?.map((product: IProductDto) => (
               <TableRow key={product.id}>
                 {productColumns.map((field) =>
                   renderTableCell(
                     product,
-                    field as keyof IProduct,
+                    field as keyof IProductDto,
                     searchTerm,
                     searchType,
                     searchColumn

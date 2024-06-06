@@ -7,7 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import { toast } from "react-toastify";
-import { IProduct } from "../../types/product.tying";
+import { IProductDto } from "../../types/product.tying";
 import ProductForm from "../../components/product/ProductForm.component";
 import ProductGrid from "../../components/product/ProductGrid.component";
 import ProductService from "../../services/ProductService";
@@ -15,7 +15,7 @@ import SearchBox from "../../components/search/SearchBox.component";
 import DeleteDialog from "../../components/dialog/DeleteDialog.component";
 
 const Product = () => {
-  const [products, setProducts] = useState<IProduct[]>([]);
+  const [products, setProducts] = useState<IProductDto[]>([]);
   const [productCode, setProductCode] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
