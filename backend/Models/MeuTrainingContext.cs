@@ -15,26 +15,42 @@ public partial class MeuTrainingContext : DbContext
     {
     }
 
+    public virtual DbSet<Brand> Brands { get; set; }
+
     public virtual DbSet<Product> Products { get; set; }
+
+    public virtual DbSet<Type> Types { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=MeuTraining");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Product>(entity =>
+        modelBuilder.Entity<Brand>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__product__3213E83F90E83296");
+            entity.HasKey(e => e.Id).HasName("PK__Brand__3213E83F72F85D69");
 
-            entity.ToTable("product");
+            entity.ToTable("Brand");
 
-            entity.HasIndex(e => e.Code, "UQ__product__357D4CF98F498875").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__Brand__72E12F1B98962DF6").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Brand)
+            entity.Property(e => e.Name)
                 .HasMaxLength(28)
                 .IsUnicode(false)
-                .HasColumnName("brand");
+                .HasColumnName("name");
+        });
+
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Product__3213E83F172D7879");
+
+            entity.ToTable("Product");
+
+            entity.HasIndex(e => e.Code, "UQ__Product__357D4CF91DE16CF5").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.BrandId).HasColumnName("brand_id");
             entity.Property(e => e.Category)
                 .HasMaxLength(28)
                 .IsUnicode(false)
@@ -51,10 +67,30 @@ public partial class MeuTrainingContext : DbContext
                 .HasMaxLength(90)
                 .IsUnicode(false)
                 .HasColumnName("name");
-            entity.Property(e => e.Type)
+            entity.Property(e => e.TypeId).HasColumnName("type_id");
+
+            entity.HasOne(d => d.Brand).WithMany(p => p.Products)
+                .HasForeignKey(d => d.BrandId)
+                .HasConstraintName("FK__Product__brand_i__3E52440B");
+
+            entity.HasOne(d => d.Type).WithMany(p => p.Products)
+                .HasForeignKey(d => d.TypeId)
+                .HasConstraintName("FK__Product__type_id__3F466844");
+        });
+
+        modelBuilder.Entity<Type>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Type__3213E83F24ADD96E");
+
+            entity.ToTable("Type");
+
+            entity.HasIndex(e => e.Name, "UQ__Type__72E12F1BB8BB82C1").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name)
                 .HasMaxLength(21)
                 .IsUnicode(false)
-                .HasColumnName("type");
+                .HasColumnName("name");
         });
 
         OnModelCreatingPartial(modelBuilder);

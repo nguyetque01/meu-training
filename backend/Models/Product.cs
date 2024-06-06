@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace backend.Models;
 
@@ -14,12 +13,13 @@ public partial class Product
 
     public string Category { get; set; } = null!;
 
-    public string? Brand { get; set; }
+    public int? BrandId { get; set; }
 
-    public string? Type { get; set; }
+    public int? TypeId { get; set; }
 
     public string? Description { get; set; }
 
-    [NotMapped]
-    public Dictionary<string, List<int>> SearchMatches { get; set; } = new Dictionary<string, List<int>>();
+    public virtual Brand? Brand { get; set; }
+
+    public virtual Type? Type { get; set; }
 }
