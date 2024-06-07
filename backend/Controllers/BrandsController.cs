@@ -21,14 +21,41 @@ namespace backend.Controllers
             _responseHelper = responseHelper;
         }
 
-        // GET: api/brands
-        [HttpGet]
-        public async Task<IActionResult> GetBrands()
+        // GET: api/brands/all
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllBrands()
         {
             try
             {
                 var brands = await _brandRepository.GetAllBrands();
                 return _responseHelper.CreateResponse("Brands retrieved successfully", brands, "success");
+            }
+            catch (Exception ex)
+            {
+                return _responseHelper.CreateResponse($"An error occurred: {ex.Message}", null, "fail");
+            }
+        }
+
+
+        // GET: /api/brands?page=1&size=5&sort=id&dir=asc
+        [HttpGet]
+        public async Task<IActionResult> GetBrandPages(
+            [FromQuery] int page = 1,
+            [FromQuery] int size = 5,
+            [FromQuery] string sort = "id",
+            [FromQuery] string dir = "asc",
+            [FromQuery] string search = "",
+            [FromQuery] string searchColumn = "all",
+            [FromQuery] string searchType = "partial")
+        {
+            try
+            {
+                if (page <= 0) page = 1;
+                if (size <= 0) size = 5;
+
+                var (totalItems, pagedResult) = await _brandRepository.GetBrandsPageAsync(page, size, sort, dir, search, searchColumn, searchType);
+
+                return _responseHelper.CreateResponse("Brands retrieved successfully", new { items = pagedResult, totalCount = totalItems }, "success");
             }
             catch (Exception ex)
             {
@@ -98,8 +125,8 @@ namespace backend.Controllers
         {
             try
             {
-                var BrandExists = await _brandRepository.BrandExists(id);
-                if (!BrandExists)
+                var brandExists = await _brandRepository.BrandExists(id);
+                if (!brandExists)
                 {
                     return _responseHelper.CreateResponse("Brand not found", null, "fail");
                 }

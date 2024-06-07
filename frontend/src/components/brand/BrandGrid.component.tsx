@@ -11,56 +11,60 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import { IProductDto } from "../../types/product.tying";
-import { highlightText, shouldHighlight } from "../../utils/highlight.utils";
+import { IBrand } from "../../types/brand.tying";
+import {
+  highlightText,
+  shouldHighlightBrand,
+} from "../../utils/highlight.utils";
 import { capitalizeFirstLetter } from "../../utils/string.utils";
-import { productColumns } from "../../constants/columns.contants";
+import { brandColumns } from "../../constants/columns.contants";
 
-interface ProductGridProps {
-  products: IProductDto[];
+interface BrandGridProps {
+  brands: IBrand[];
   page: number;
   pageSize: number;
-  totalProducts: number;
+  totalBrands: number;
   searchTerm: string;
   searchColumn: string;
   searchType: string;
-  handleClickEditBtn: (code: string) => void;
-  handleClickDeleteBtn: (code: string) => void;
+  handleClickEditBtn: (id: number) => void;
+  handleClickDeleteBtn: (id: number) => void;
   onChangePage: (newPage: number) => void;
   onChangePageSize: (newPageSize: number) => void;
 }
 
 const renderTableCell = (
-  product: IProductDto,
-  field: keyof IProductDto,
+  brand: IBrand,
+  field: keyof IBrand,
   searchTerm: string,
   searchType: string,
   searchColumn: string
 ) => {
-  const productField = product[field];
+  const brandField = brand[field];
   const matchField =
-    product.searchMatches[field as keyof IProductDto["searchMatches"]];
+    brand.searchMatches[field as keyof IBrand["searchMatches"]];
 
   return (
     <TableCell key={field}>
-      {productField &&
-        (shouldHighlight(product, field as string, searchColumn) && matchField
+      {brandField &&
+        (shouldHighlightBrand(brand, field as string, searchColumn) &&
+        matchField
           ? highlightText(
-              productField.toString(),
+              brandField.toString(),
               matchField as number[],
               searchTerm,
               searchType
             )
-          : productField.toString())}
+          : brandField.toString())}
     </TableCell>
   );
 };
 
-const ProductGrid = ({
-  products,
+const BrandGrid = ({
+  brands,
   page,
   pageSize,
-  totalProducts,
+  totalBrands,
   searchTerm,
   searchColumn,
   searchType,
@@ -68,7 +72,7 @@ const ProductGrid = ({
   handleClickDeleteBtn,
   onChangePage,
   onChangePageSize,
-}: ProductGridProps) => {
+}: BrandGridProps) => {
   const handleChangePage = (event: unknown, newPage: number) => {
     onChangePage(newPage + 1);
   };
@@ -81,12 +85,12 @@ const ProductGrid = ({
   };
 
   return (
-    <Box className="grid" sx={{ p: 2 }}>
+    <Box sx={{ p: 2 }}>
       <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
-              {productColumns.map((column) => (
+              {brandColumns.map((column) => (
                 <TableCell key={column}>
                   {capitalizeFirstLetter(column)}
                 </TableCell>
@@ -95,18 +99,18 @@ const ProductGrid = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {products?.map((product: IProductDto) => (
-              <TableRow key={product.id}>
-                {productColumns.map((field) =>
+            {brands?.map((brand: IBrand) => (
+              <TableRow key={brand.id}>
+                {brandColumns.map((field) =>
                   renderTableCell(
-                    product,
-                    field as keyof IProductDto,
+                    brand,
+                    field as keyof IBrand,
                     searchTerm,
                     searchType,
                     searchColumn
                   )
                 )}
-                <TableCell>
+                <TableCell width={100}>
                   <Box
                     sx={{
                       display: "flex",
@@ -120,7 +124,7 @@ const ProductGrid = ({
                       color="secondary"
                       variant="outlined"
                       sx={{ mr: 1 }}
-                      onClick={() => handleClickEditBtn(product.code)}
+                      onClick={() => handleClickEditBtn(brand.id)}
                     >
                       Edit
                     </Button>
@@ -129,7 +133,7 @@ const ProductGrid = ({
                       size="small"
                       color="error"
                       variant="outlined"
-                      onClick={() => handleClickDeleteBtn(product.code)}
+                      onClick={() => handleClickDeleteBtn(brand.id)}
                     >
                       Delete
                     </Button>
@@ -143,7 +147,7 @@ const ProductGrid = ({
             <TableRow>
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
-                count={totalProducts}
+                count={totalBrands}
                 rowsPerPage={pageSize}
                 page={page - 1}
                 onPageChange={handleChangePage}
@@ -157,4 +161,4 @@ const ProductGrid = ({
   );
 };
 
-export default ProductGrid;
+export default BrandGrid;

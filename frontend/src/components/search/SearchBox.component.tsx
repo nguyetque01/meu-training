@@ -8,11 +8,12 @@ import {
   InputLabel,
   SelectChangeEvent,
 } from "@mui/material";
-import { productColumns } from "../../constants/product.contants";
+import { productColumns } from "../../constants/columns.contants";
 import { capitalizeFirstLetter } from "../../utils/string.utils";
 import { useDebounce } from "../../hooks/debounce";
 
 interface ISearchBoxProps {
+  columns: string[];
   onSearch: (
     searchTerm: string,
     searchColumn: string,
@@ -20,7 +21,7 @@ interface ISearchBoxProps {
   ) => void;
 }
 
-const SearchBox: React.FC<ISearchBoxProps> = ({ onSearch }) => {
+const SearchBox: React.FC<ISearchBoxProps> = ({ columns, onSearch }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchColumn, setSearchColumn] = useState<string>("all");
   const [searchType, setSearchType] = useState<string>("partial");
@@ -54,7 +55,7 @@ const SearchBox: React.FC<ISearchBoxProps> = ({ onSearch }) => {
           label="Column"
         >
           <MenuItem value="all">All</MenuItem>
-          {productColumns.map((column) => (
+          {columns.map((column) => (
             <MenuItem key={column} value={column}>
               {capitalizeFirstLetter(column)}
             </MenuItem>

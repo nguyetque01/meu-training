@@ -7,32 +7,33 @@ import {
   Typography,
 } from "@mui/material";
 import { toast } from "react-toastify";
-import { IProductDto } from "../../types/product.tying";
-import ProductForm from "../../components/product/ProductForm.component";
-import ProductGrid from "../../components/product/ProductGrid.component";
-import ProductService from "../../services/ProductService";
+import { IBrand } from "../../types/brand.tying";
+import BrandForm from "../../components/brand/BrandForm.component";
+import BrandGrid from "../../components/brand/BrandGrid.component";
+import BrandService from "../../services/BrandService";
 import SearchBox from "../../components/search/SearchBox.component";
 import DeleteDialog from "../../components/dialog/DeleteDialog.component";
-import { productColumns } from "../../constants/columns.contants";
+import { brandColumns } from "../../constants/columns.contants";
 
-const Product = () => {
-  const [products, setProducts] = useState<IProductDto[]>([]);
-  const [productCode, setProductCode] = useState<string>("");
+const Brand = () => {
+  const [brands, setbrands] = useState<IBrand[]>([]);
+  const [brandId, setbrandId] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
-  const [totalProducts, setTotalProducts] = useState<number>(0);
+  const [totalbrands, setTotalbrands] = useState<number>(0);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchColumn, setSearchColumn] = useState<string>("all");
   const [searchType, setSearchType] = useState<string>("partial");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
-  const [deleteProductCode, setDeleteProductCode] = useState<string>("");
+  const [deleteBrandId, setDeleteBrandId] = useState<number>(0);
 
-  const fetchProducts = useCallback(async () => {
+  const fetchbrands = useCallback(async () => {
     try {
       setLoading(true);
-      const productData = await ProductService.getAllProducts(
+
+      const brandData = await BrandService.getBrandsPage(
         page,
         pageSize,
         undefined,
@@ -41,24 +42,23 @@ const Product = () => {
         searchColumn,
         searchType
       );
-
-      if (!productData || !productData.items) {
-        console.error("Product data or items is undefined");
+      if (!brandData || !brandData.items) {
+        console.error("Brand data or items is undefined");
       } else {
-        setProducts(productData.items);
-        setTotalProducts(productData.totalCount);
+        setbrands(brandData.items);
+        setTotalbrands(brandData.totalCount);
       }
     } catch (error) {
-      console.error("Error fetching products", error);
-      toast.error("Error fetching products");
+      console.error("Error fetching brands", error);
+      toast.error("Error fetching brands");
     } finally {
       setLoading(false);
     }
   }, [page, pageSize, searchTerm, searchColumn, searchType]);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    fetchbrands();
+  }, [fetchbrands]);
 
   const openForm = () => setIsFormOpen(true);
 
@@ -69,39 +69,39 @@ const Product = () => {
   const closeDeleteDialog = () => setIsDeleteDialogOpen(false);
 
   const handleClickAddBtn = () => {
-    setProductCode("");
+    setbrandId(0);
     setIsFormOpen((prev) => !prev);
   };
 
-  const handleClickEditBtn = (productCode: string) => {
-    setProductCode(productCode);
+  const handleClickEditBtn = (brandId: number) => {
+    setbrandId(brandId);
     openForm();
   };
 
-  const handleClickDeleteBtn = async (productCode: string) => {
-    setDeleteProductCode(productCode);
+  const handleClickDeleteBtn = async (brandId: number) => {
+    setDeleteBrandId(brandId);
     openDeleteDialog();
   };
 
-  const deleteProduct = async () => {
+  const deleteBrand = async () => {
     try {
-      await ProductService.deleteProduct(deleteProductCode);
+      await BrandService.deleteBrand(deleteBrandId);
       closeDeleteDialog();
-      toast.success("Product deleted successfully!");
+      toast.success("Brand deleted successfully!");
       setPage(1);
     } catch (error) {
-      console.error("Error deleting product:", error);
-      toast.error("Error deleting product. Please try again.");
+      console.error("Error deleting Brand:", error);
+      toast.error("Error deleting Brand. Please try again.");
     } finally {
       closeDeleteDialog();
     }
   };
 
-  const handleSaveSuccess = async (newProductCode: string) => {
-    if (productCode === "") {
-      setProductCode(newProductCode);
+  const handleSaveSuccess = async (newbrandId: number) => {
+    if (brandId === 0) {
+      setbrandId(newbrandId);
     }
-    fetchProducts();
+    fetchbrands();
   };
 
   const handleClickCancelBtn = () => {
@@ -140,20 +140,20 @@ const Product = () => {
       >
         <Typography variant="h3" gutterBottom>
           {isFormOpen
-            ? productCode === ""
-              ? "Create Products"
-              : "Edit Products"
-            : "Products"}
+            ? brandId === 0
+              ? "Create brands"
+              : "Edit brands"
+            : "Brands"}
         </Typography>
         <Button variant="contained" onClick={handleClickAddBtn}>
-          {isFormOpen ? "Back To Listing" : "Create New Product"}
+          {isFormOpen ? "Back To Listing" : "Create New Brand"}
         </Button>
       </Box>
 
       {isFormOpen ? (
         <div className="form-content">
-          <ProductForm
-            productCode={productCode}
+          <BrandForm
+            brandId={brandId}
             onSaveSuccess={handleSaveSuccess}
             handleClickCancelBtn={handleClickCancelBtn}
           />
@@ -161,22 +161,22 @@ const Product = () => {
       ) : (
         <>
           <Box sx={{ p: 2 }}>
-            <SearchBox columns={productColumns} onSearch={handleSearch} />
+            <SearchBox columns={brandColumns} onSearch={handleSearch} />
           </Box>
           {loading ? (
             <Box sx={{ p: 2, textAlign: "center" }}>
               <CircularProgress size={100} />
             </Box>
-          ) : products?.length === 0 ? (
+          ) : brands?.length === 0 ? (
             <Box sx={{ p: 2, textAlign: "center" }}>
               <Typography variant="h5">Not found</Typography>
             </Box>
           ) : (
-            <ProductGrid
-              products={products}
+            <BrandGrid
+              brands={brands}
               page={page}
               pageSize={pageSize}
-              totalProducts={totalProducts}
+              totalBrands={totalbrands}
               searchTerm={searchTerm}
               searchColumn={searchColumn}
               searchType={searchType}
@@ -187,10 +187,10 @@ const Product = () => {
             />
           )}
           <DeleteDialog
-            item={"product"}
+            item={"Brand"}
             isOpen={isDeleteDialogOpen}
             handleClose={() => setIsDeleteDialogOpen(false)}
-            handleConfirm={deleteProduct}
+            handleConfirm={deleteBrand}
           />
         </>
       )}
@@ -198,4 +198,4 @@ const Product = () => {
   );
 };
 
-export default Product;
+export default Brand;
