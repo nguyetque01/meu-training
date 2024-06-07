@@ -5,25 +5,42 @@ import { ICreateBrand, IBrand } from "../types/brand.tying";
 const API_ENDPOINT = "/brands";
 
 const BrandService = {
-  getAllBrands: async (): Promise<IBrand[]> => {
+  getBrandsPage: async (
+    page: number = 1,
+    size: number = 10,
+    sort: string = "id",
+    dir: string = "asc",
+    search: string = "",
+    searchColumn: string = "all",
+    searchType: string = "partial"
+  ): Promise<{ items: IBrand[]; totalCount: number }> => {
     try {
-      const response = await httpModule.get<ApiResponse<IBrand[]>>(
-        API_ENDPOINT
-      );
+      let endpoint = `${API_ENDPOINT}?page=${page}&size=${size}&sort=${sort}&dir=${dir}`;
+      if (search) {
+        endpoint += `&search=${search}&searchColumn=${searchColumn}&searchType=${searchType}`;
+      }
+
+      const response = await httpModule.get<
+        ApiResponse<{
+          items: IBrand[];
+          totalCount: number;
+        }>
+      >(endpoint);
+
       if (response.data.status === "success") {
         return response.data.responseData;
-      } else {
-        throw new Error(response.data.message);
       }
+
+      throw new Error(response.data.message);
     } catch (error) {
       throw new Error("Failed to fetch brands");
     }
   },
 
-  getAllBrandDetails: async (): Promise<IBrand[]> => {
+  getAllBrands: async (): Promise<IBrand[]> => {
     try {
       const response = await httpModule.get<ApiResponse<IBrand[]>>(
-        `${API_ENDPOINT}/details`
+        API_ENDPOINT
       );
       if (response.data.status === "success") {
         return response.data.responseData;

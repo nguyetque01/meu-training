@@ -7,3 +7,5 @@ export const productColumns: string[] = [
   "type",
   "description",
 ];
+
+export const brandColumns = ["id", "name"];

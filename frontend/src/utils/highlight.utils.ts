@@ -1,6 +1,7 @@
 import React from "react";
 
 import { IProductDto } from "../types/product.tying";
+import { IBrand } from "../types/brand.tying";
 
 export const shouldHighlight = (
   product: IProductDto,
@@ -8,6 +9,15 @@ export const shouldHighlight = (
   searchColumn: string
 ) => {
   var isMatchColumn = product.searchMatches.hasOwnProperty(column);
+  return searchColumn === "all" || isMatchColumn;
+};
+
+export const shouldHighlightBrand = (
+  brand: IBrand,
+  column: string,
+  searchColumn: string
+) => {
+  var isMatchColumn = brand.searchMatches.hasOwnProperty(column);
   return searchColumn === "all" || isMatchColumn;
 };
 
