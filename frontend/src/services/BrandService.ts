@@ -40,7 +40,7 @@ const BrandService = {
   getAllBrands: async (): Promise<IBrand[]> => {
     try {
       const response = await httpModule.get<ApiResponse<IBrand[]>>(
-        API_ENDPOINT
+        `${API_ENDPOINT}/all`
       );
       if (response.data.status === "success") {
         return response.data.responseData;

@@ -10,6 +10,9 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from "@mui/material";
 import { IProductDto } from "../../types/product.tying";
 import { highlightText, shouldHighlight } from "../../utils/highlight.utils";
@@ -24,10 +27,15 @@ interface ProductGridProps {
   searchTerm: string;
   searchColumn: string;
   searchType: string;
+  brandNames: string[];
+  typeNames: string[];
+  selectedBrand: string;
+  selectedType: string;
   handleClickEditBtn: (code: string) => void;
   handleClickDeleteBtn: (code: string) => void;
   onChangePage: (newPage: number) => void;
   onChangePageSize: (newPageSize: number) => void;
+  onFilterChange: (column: string, value: string) => void;
 }
 
 const renderTableCell = (
@@ -64,10 +72,15 @@ const ProductGrid = ({
   searchTerm,
   searchColumn,
   searchType,
+  brandNames,
+  typeNames,
+  selectedBrand,
+  selectedType,
   handleClickEditBtn,
   handleClickDeleteBtn,
   onChangePage,
   onChangePageSize,
+  onFilterChange,
 }: ProductGridProps) => {
   const handleChangePage = (event: unknown, newPage: number) => {
     onChangePage(newPage + 1);
@@ -80,6 +93,16 @@ const ProductGrid = ({
     onChangePage(1);
   };
 
+  const handleBrandChange = (event: SelectChangeEvent<string>) => {
+    const brand = event.target.value as string;
+    onFilterChange("brand", brand);
+  };
+
+  const handleTypeChange = (event: SelectChangeEvent<string>) => {
+    const type = event.target.value as string;
+    onFilterChange("type", type);
+  };
+
   return (
     <Box className="grid" sx={{ p: 2 }}>
       <TableContainer>
@@ -87,11 +110,43 @@ const ProductGrid = ({
           <TableHead>
             <TableRow>
               {productColumns.map((column) => (
-                <TableCell key={column}>
-                  {capitalizeFirstLetter(column)}
+                <TableCell key={column} sx={{ fontSize: 16 }}>
+                  {column === "brand" ? (
+                    <Select
+                      value={selectedBrand}
+                      onChange={handleBrandChange}
+                      displayEmpty
+                    >
+                      <MenuItem value="">
+                        <em>All Brands</em>
+                      </MenuItem>
+                      {brandNames.map((brand) => (
+                        <MenuItem key={brand} value={brand}>
+                          {brand}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  ) : column === "type" ? (
+                    <Select
+                      value={selectedType}
+                      onChange={handleTypeChange}
+                      displayEmpty
+                    >
+                      <MenuItem value="">
+                        <em>All Types</em>
+                      </MenuItem>
+                      {typeNames.map((type) => (
+                        <MenuItem key={type} value={type}>
+                          {type}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  ) : (
+                    capitalizeFirstLetter(column)
+                  )}
                 </TableCell>
               ))}
-              <TableCell>Actions</TableCell>
+              <TableCell sx={{ fontSize: 16 }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -138,7 +193,6 @@ const ProductGrid = ({
               </TableRow>
             ))}
           </TableBody>
-
           <TableFooter>
             <TableRow>
               <TablePagination
