@@ -8,7 +8,6 @@ import {
   InputLabel,
   SelectChangeEvent,
 } from "@mui/material";
-import { productColumns } from "../../constants/columns.contants";
 import { capitalizeFirstLetter } from "../../utils/string.utils";
 import { useDebounce } from "../../hooks/debounce";
 

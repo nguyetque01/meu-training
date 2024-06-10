@@ -6,10 +6,6 @@ import {
   Paper,
   Grid,
   CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
 } from "@mui/material";
 import BrandService from "../../services/BrandService";
 import { toast } from "react-toastify";

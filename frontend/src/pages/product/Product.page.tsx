@@ -1,11 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Paper, Typography } from "@mui/material";
 import { toast } from "react-toastify";
 import { IProductDto } from "../../types/product.tying";
 import ProductForm from "../../components/product/ProductForm.component";
@@ -14,9 +8,13 @@ import ProductService from "../../services/ProductService";
 import SearchBox from "../../components/search/SearchBox.component";
 import DeleteDialog from "../../components/dialog/DeleteDialog.component";
 import { productColumns } from "../../constants/columns.contants";
+import BrandService from "../../services/BrandService";
+import TypeService from "../../services/TypeService";
 
 const Product = () => {
   const [products, setProducts] = useState<IProductDto[]>([]);
+  const [brandNames, setBrandNames] = useState<string[]>([]);
+  const [typeNames, setTypeNames] = useState<string[]>([]);
   const [productCode, setProductCode] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
@@ -26,6 +24,8 @@ const Product = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchColumn, setSearchColumn] = useState<string>("all");
   const [searchType, setSearchType] = useState<string>("partial");
+  const [selectedBrand, setSelectedBrand] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<string>("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const [deleteProductCode, setDeleteProductCode] = useState<string>("");
 
@@ -39,7 +39,9 @@ const Product = () => {
         undefined,
         searchTerm,
         searchColumn,
-        searchType
+        searchType,
+        selectedBrand,
+        selectedType
       );
 
       if (!productData || !productData.items) {
@@ -54,11 +56,41 @@ const Product = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, searchTerm, searchColumn, searchType]);
+  }, [
+    page,
+    pageSize,
+    searchTerm,
+    searchColumn,
+    searchType,
+    selectedBrand,
+    selectedType,
+  ]);
+
+  const fetchBrands = useCallback(async () => {
+    try {
+      const brandData = await BrandService.getAllBrands();
+      setBrandNames(brandData.map((brand) => brand.name));
+    } catch (error) {
+      console.error("Error fetching brands", error);
+      toast.error("Error fetching brands");
+    }
+  }, []);
+
+  const fetchTypes = useCallback(async () => {
+    try {
+      const typeData = await TypeService.getAllTypes();
+      setTypeNames(typeData.map((type) => type.name));
+    } catch (error) {
+      console.error("Error fetching types", error);
+      toast.error("Error fetching types");
+    }
+  }, []);
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+    fetchBrands();
+    fetchTypes();
+  }, [fetchProducts, fetchBrands, fetchTypes]);
 
   const openForm = () => setIsFormOpen(true);
 
@@ -127,6 +159,11 @@ const Product = () => {
     setPage(1);
   };
 
+  const handleFilterChange = (column: string, value: string) => {
+    column === "brand" && setSelectedBrand(value);
+    column === "type" && setSelectedType(value);
+  };
+
   return (
     <Paper className="content">
       <Box
@@ -163,29 +200,27 @@ const Product = () => {
           <Box sx={{ p: 2 }}>
             <SearchBox columns={productColumns} onSearch={handleSearch} />
           </Box>
-          {loading ? (
-            <Box sx={{ p: 2, textAlign: "center" }}>
-              <CircularProgress size={100} />
-            </Box>
-          ) : products?.length === 0 ? (
-            <Box sx={{ p: 2, textAlign: "center" }}>
-              <Typography variant="h5">Not found</Typography>
-            </Box>
-          ) : (
-            <ProductGrid
-              products={products}
-              page={page}
-              pageSize={pageSize}
-              totalProducts={totalProducts}
-              searchTerm={searchTerm}
-              searchColumn={searchColumn}
-              searchType={searchType}
-              handleClickEditBtn={handleClickEditBtn}
-              handleClickDeleteBtn={handleClickDeleteBtn}
-              onChangePage={handleChangePage}
-              onChangePageSize={handleChangePageSize}
-            />
-          )}
+
+          <ProductGrid
+            isLoading={loading}
+            products={products}
+            page={page}
+            pageSize={pageSize}
+            totalProducts={totalProducts}
+            searchTerm={searchTerm}
+            searchColumn={searchColumn}
+            searchType={searchType}
+            brandNames={brandNames}
+            typeNames={typeNames}
+            selectedBrand={selectedBrand}
+            selectedType={selectedType}
+            handleClickEditBtn={handleClickEditBtn}
+            handleClickDeleteBtn={handleClickDeleteBtn}
+            onChangePage={handleChangePage}
+            onChangePageSize={handleChangePageSize}
+            onFilterChange={handleFilterChange}
+          />
+
           <DeleteDialog
             item={"product"}
             isOpen={isDeleteDialogOpen}
