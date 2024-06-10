@@ -58,7 +58,7 @@ const Brand = () => {
 
   useEffect(() => {
     fetchBrands();
-  }, [fetchBrands]);
+  }, [fetchBrands, page]);
 
   const openForm = () => setIsFormOpen(true);
 
@@ -86,10 +86,13 @@ const Brand = () => {
   const deleteBrand = async () => {
     try {
       await BrandService.deleteBrand(deleteBrandId);
+      if (brands.length === 1 && page > 1) {
+        setPage(page - 1);
+      } else {
+        fetchBrands();
+      }
       closeDeleteDialog();
       toast.success("Brand deleted successfully!");
-      fetchBrands();
-      setPage(1);
     } catch (error) {
       console.error("Error deleting Brand:", error);
       toast.error("Error deleting Brand. Please try again.");

@@ -90,7 +90,7 @@ const Product = () => {
     fetchProducts();
     fetchBrands();
     fetchTypes();
-  }, [fetchProducts, fetchBrands, fetchTypes]);
+  }, [fetchProducts, fetchBrands, fetchTypes, page]);
 
   const openForm = () => setIsFormOpen(true);
 
@@ -118,9 +118,13 @@ const Product = () => {
   const deleteProduct = async () => {
     try {
       await ProductService.deleteProduct(deleteProductCode);
+      if (products.length === 1 && page > 1) {
+        setPage(page - 1);
+      } else {
+        fetchProducts();
+      }
       closeDeleteDialog();
       toast.success("Product deleted successfully!");
-      setPage(1);
     } catch (error) {
       console.error("Error deleting product:", error);
       toast.error("Error deleting product. Please try again.");
@@ -203,7 +207,6 @@ const Product = () => {
           <Box sx={{ p: 2 }}>
             <SearchBox columns={productColumns} onSearch={handleSearch} />
           </Box>
-
           <ProductGrid
             isLoading={loading}
             products={products}
@@ -223,7 +226,6 @@ const Product = () => {
             onChangePageSize={handleChangePageSize}
             onFilterChange={handleFilterChange}
           />
-
           <DeleteDialog
             item={"product"}
             isOpen={isDeleteDialogOpen}
