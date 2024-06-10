@@ -17,7 +17,7 @@ namespace backend.Controllers
             _responseHelper = responseHelper;
         }
 
-        // GET: /api/products?page=1&size=5&sort=id&dir=asc
+        // GET: /api/products?page=1&size=5&sort=id&dir=asc&search=p001&searchColumn=all&searchType=partial&brand=Medicos&type=Hygiene
         [HttpGet]
         public async Task<IActionResult> GetProducts(
             [FromQuery] int page = 1,
@@ -26,14 +26,16 @@ namespace backend.Controllers
             [FromQuery] string dir = "asc",
             [FromQuery] string search = "",
             [FromQuery] string searchColumn = "all",
-            [FromQuery] string searchType = "partial")
+            [FromQuery] string searchType = "partial",
+            [FromQuery] string brand = "",
+            [FromQuery] string type = "")
         {
             try
             {
                 if (page <= 0) page = 1;
                 if (size <= 0) size = 5;
 
-                var (totalItems, pagedResult) = await _productRepository.GetProductsAsync(page, size, sort, dir, search, searchColumn, searchType);
+                var (totalItems, pagedResult) = await _productRepository.GetProductsAsync(page, size, sort, dir, search, searchColumn, searchType, brand, type);
 
                 return _responseHelper.CreateResponse("Products retrieved successfully", new { items = pagedResult, totalCount = totalItems }, "success");
             }

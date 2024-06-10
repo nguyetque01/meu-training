@@ -9,7 +9,7 @@ namespace backend.Repositories
 {
     public interface IProductRepository
     {
-        Task<(int totalCount, IEnumerable<ProductDto> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "");
+        Task<(int totalCount, IEnumerable<ProductDto> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "", string brand = "", string type = "");
         Task<Product> GetProductByCodeAsync(string code);
         Task<ProductDto> GetProductDetailByCodeAsync(string code);
         Task<bool> AddProductAsync(Product product);
@@ -28,7 +28,7 @@ namespace backend.Repositories
             _searchHelper = searchHelper;
         }
 
-        public async Task<(int totalCount, IEnumerable<ProductDto> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "")
+        public async Task<(int totalCount, IEnumerable<ProductDto> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "", string brand = "", string type = "")
         {
             var query = _context.Products
                 .Include(p => p.Brand)
@@ -48,6 +48,15 @@ namespace backend.Repositories
             if (!string.IsNullOrWhiteSpace(search))
             {
                 query = _searchHelper.ApplyProductSearchFilter(query, search, searchColumn, searchType);
+            }
+
+            if (!string.IsNullOrEmpty(brand))
+            {
+                query = query.Where(p => p.Brand == brand);
+            }
+            if (!string.IsNullOrEmpty(type))
+            {
+                query = query.Where(p => p.Type == type);
             }
 
             var totalCount = await query.CountAsync();

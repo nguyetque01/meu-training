@@ -28,7 +28,6 @@ const Product = () => {
   const [selectedType, setSelectedType] = useState<string>("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const [deleteProductCode, setDeleteProductCode] = useState<string>("");
-  const [isFiltering, setIsFiltering] = useState<boolean>(false);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -40,7 +39,9 @@ const Product = () => {
         undefined,
         searchTerm,
         searchColumn,
-        searchType
+        searchType,
+        selectedBrand,
+        selectedType
       );
 
       if (!productData || !productData.items) {
@@ -55,7 +56,15 @@ const Product = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, searchTerm, searchColumn, searchType]);
+  }, [
+    page,
+    pageSize,
+    searchTerm,
+    searchColumn,
+    searchType,
+    selectedBrand,
+    selectedType,
+  ]);
 
   const fetchBrands = useCallback(async () => {
     try {
@@ -148,14 +157,11 @@ const Product = () => {
     setSearchColumn(searchColumn);
     setSearchType(searchType);
     setPage(1);
-    setIsFiltering(false);
   };
 
   const handleFilterChange = (column: string, value: string) => {
     column === "brand" && setSelectedBrand(value);
     column === "type" && setSelectedType(value);
-    handleSearch(value, column, "exact");
-    setIsFiltering(true);
   };
 
   return (
@@ -208,7 +214,6 @@ const Product = () => {
             typeNames={typeNames}
             selectedBrand={selectedBrand}
             selectedType={selectedType}
-            isFiltering={isFiltering}
             handleClickEditBtn={handleClickEditBtn}
             handleClickDeleteBtn={handleClickDeleteBtn}
             onChangePage={handleChangePage}

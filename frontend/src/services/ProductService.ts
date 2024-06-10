@@ -12,12 +12,20 @@ const ProductService = {
     dir: string = "asc",
     search: string = "",
     searchColumn: string = "all",
-    searchType: string = "partial"
+    searchType: string = "partial",
+    brand: string = "",
+    type: string = ""
   ): Promise<{ items: IProductDto[]; totalCount: number }> => {
     try {
       let endpoint = `${API_ENDPOINT}?page=${page}&size=${size}&sort=${sort}&dir=${dir}`;
       if (search) {
         endpoint += `&search=${search}&searchColumn=${searchColumn}&searchType=${searchType}`;
+      }
+      if (brand) {
+        endpoint += `&brand=${brand}`;
+      }
+      if (type) {
+        endpoint += `&type=${type}`;
       }
 
       const response = await httpModule.get<

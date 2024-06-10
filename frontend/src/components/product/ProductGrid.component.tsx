@@ -23,7 +23,6 @@ import { productColumns } from "../../constants/columns.contants";
 
 interface ProductGridProps {
   isLoading: boolean;
-  isFiltering: boolean;
   products: IProductDto[];
   page: number;
   pageSize: number;
@@ -43,7 +42,6 @@ interface ProductGridProps {
 }
 
 const renderTableCell = (
-  isFiltering: boolean,
   product: IProductDto,
   field: keyof IProductDto,
   searchTerm: string,
@@ -57,9 +55,7 @@ const renderTableCell = (
   return (
     <TableCell key={field}>
       {productField &&
-        (!isFiltering &&
-        shouldHighlight(product, field as string, searchColumn) &&
-        matchField
+        (shouldHighlight(product, field as string, searchColumn) && matchField
           ? highlightText(
               productField.toString(),
               matchField as number[],
@@ -73,7 +69,6 @@ const renderTableCell = (
 
 const ProductGrid = ({
   isLoading,
-  isFiltering,
   products,
   page,
   pageSize,
@@ -114,121 +109,125 @@ const ProductGrid = ({
 
   return (
     <>
-      {isLoading ? (
-        <Box sx={{ p: 2, textAlign: "center" }}>
-          <CircularProgress size={100} />
-        </Box>
-      ) : products?.length === 0 ? (
-        <Box sx={{ p: 2, textAlign: "center" }}>
-          <Typography variant="h5">Not found</Typography>
-        </Box>
-      ) : (
-        <Box className="grid" sx={{ p: 2 }}>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  {productColumns.map((column) => (
-                    <TableCell key={column} sx={{ fontSize: 16 }}>
-                      {column === "brand" ? (
-                        <Select
-                          value={selectedBrand}
-                          onChange={handleBrandChange}
-                          displayEmpty
-                        >
-                          <MenuItem value="">
-                            <em>All Brands</em>
-                          </MenuItem>
-                          {brandNames.map((brand) => (
-                            <MenuItem key={brand} value={brand}>
-                              {brand}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      ) : column === "type" ? (
-                        <Select
-                          value={selectedType}
-                          onChange={handleTypeChange}
-                          displayEmpty
-                        >
-                          <MenuItem value="">
-                            <em>All Types</em>
-                          </MenuItem>
-                          {typeNames.map((type) => (
-                            <MenuItem key={type} value={type}>
-                              {type}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      ) : (
-                        capitalizeFirstLetter(column)
-                      )}
-                    </TableCell>
-                  ))}
-                  <TableCell sx={{ fontSize: 16 }}>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {products?.map((product: IProductDto) => (
-                  <TableRow key={product.id}>
-                    {productColumns.map((field) =>
-                      renderTableCell(
-                        isFiltering,
-                        product,
-                        field as keyof IProductDto,
-                        searchTerm,
-                        searchType,
-                        searchColumn
-                      )
-                    )}
-                    <TableCell>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                        }}
+      <Box className="grid" sx={{ p: 2 }}>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {productColumns.map((column) => (
+                  <TableCell key={column} sx={{ fontSize: 16 }}>
+                    {column === "brand" ? (
+                      <Select
+                        value={selectedBrand}
+                        onChange={handleBrandChange}
+                        displayEmpty
                       >
-                        <Button
-                          aria-label="edit"
-                          size="small"
-                          color="secondary"
-                          variant="outlined"
-                          sx={{ mr: 1 }}
-                          onClick={() => handleClickEditBtn(product.code)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          aria-label="delete"
-                          size="small"
-                          color="error"
-                          variant="outlined"
-                          onClick={() => handleClickDeleteBtn(product.code)}
-                        >
-                          Delete
-                        </Button>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
+                        <MenuItem value="">
+                          <em>All Brands</em>
+                        </MenuItem>
+                        {brandNames.map((brand) => (
+                          <MenuItem key={brand} value={brand}>
+                            {brand}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    ) : column === "type" ? (
+                      <Select
+                        value={selectedType}
+                        onChange={handleTypeChange}
+                        displayEmpty
+                      >
+                        <MenuItem value="">
+                          <em>All Types</em>
+                        </MenuItem>
+                        {typeNames.map((type) => (
+                          <MenuItem key={type} value={type}>
+                            {type}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    ) : (
+                      capitalizeFirstLetter(column)
+                    )}
+                  </TableCell>
                 ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    count={totalProducts}
-                    rowsPerPage={pageSize}
-                    page={page - 1}
-                    onPageChange={handleChangePage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </TableContainer>
-        </Box>
-      )}
+                <TableCell sx={{ fontSize: 16 }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            {!isLoading && products?.length !== 0 && (
+              <>
+                <TableBody>
+                  {products?.map((product: IProductDto) => (
+                    <TableRow key={product.id}>
+                      {productColumns.map((field) =>
+                        renderTableCell(
+                          product,
+                          field as keyof IProductDto,
+                          searchTerm,
+                          searchType,
+                          searchColumn
+                        )
+                      )}
+                      <TableCell>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Button
+                            aria-label="edit"
+                            size="small"
+                            color="secondary"
+                            variant="outlined"
+                            sx={{ mr: 1 }}
+                            onClick={() => handleClickEditBtn(product.code)}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            aria-label="delete"
+                            size="small"
+                            color="error"
+                            variant="outlined"
+                            onClick={() => handleClickDeleteBtn(product.code)}
+                          >
+                            Delete
+                          </Button>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TablePagination
+                      rowsPerPageOptions={[5, 10, 25]}
+                      count={totalProducts}
+                      rowsPerPage={pageSize}
+                      page={page - 1}
+                      onPageChange={handleChangePage}
+                      onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
+                  </TableRow>
+                </TableFooter>
+              </>
+            )}
+          </Table>
+        </TableContainer>
+        {isLoading ? (
+          <Box sx={{ p: 2, textAlign: "center", mt: 2 }}>
+            <CircularProgress size={100} />
+          </Box>
+        ) : (
+          products?.length === 0 && (
+            <Box sx={{ p: 2, textAlign: "center", mt: 2 }}>
+              <Typography variant="h5">Not found</Typography>
+            </Box>
+          )
+        )}
+      </Box>
     </>
   );
 };
