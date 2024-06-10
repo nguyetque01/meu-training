@@ -7,7 +7,7 @@ import ProductGrid from "../../components/product/ProductGrid.component";
 import ProductService from "../../services/ProductService";
 import SearchBox from "../../components/search/SearchBox.component";
 import DeleteDialog from "../../components/dialog/DeleteDialog.component";
-import { productColumns } from "../../constants/columns.contants";
+import { productSearchColumns } from "../../constants/columns.contants";
 import BrandService from "../../services/BrandService";
 import TypeService from "../../services/TypeService";
 
@@ -205,7 +205,7 @@ const Product = () => {
       ) : (
         <>
           <Box sx={{ p: 2 }}>
-            <SearchBox columns={productColumns} onSearch={handleSearch} />
+            <SearchBox columns={productSearchColumns} onSearch={handleSearch} />
           </Box>
           <ProductGrid
             isLoading={loading}
