@@ -13,19 +13,23 @@ const ProductService = {
     search: string = "",
     searchColumn: string = "all",
     searchType: string = "partial",
-    brand: string = "",
-    type: string = ""
+    brand: string[] = [],
+    type: string[] = []
   ): Promise<{ items: IProductDto[]; totalCount: number }> => {
     try {
       let endpoint = `${API_ENDPOINT}?page=${page}&size=${size}&sort=${sort}&dir=${dir}`;
       if (search) {
         endpoint += `&search=${search}&searchColumn=${searchColumn}&searchType=${searchType}`;
       }
-      if (brand) {
-        endpoint += `&brand=${brand}`;
+
+      if (brand.length > 0) {
+        endpoint += brand
+          .map((b) => `&brand=${encodeURIComponent(b)}`)
+          .join("");
       }
-      if (type) {
-        endpoint += `&type=${type}`;
+
+      if (type.length > 0) {
+        endpoint += type.map((t) => `&type=${encodeURIComponent(t)}`).join("");
       }
 
       const response = await httpModule.get<

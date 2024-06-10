@@ -9,7 +9,7 @@ namespace backend.Repositories
 {
     public interface IProductRepository
     {
-        Task<(int totalCount, IEnumerable<ProductDto> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "", string brand = "", string type = "");
+        Task<(int totalCount, IEnumerable<ProductDto> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "", string[]? brand = null, string[]? type = null);
         Task<Product> GetProductByCodeAsync(string code);
         Task<ProductDto> GetProductDetailByCodeAsync(string code);
         Task<bool> AddProductAsync(Product product);
@@ -28,7 +28,7 @@ namespace backend.Repositories
             _searchHelper = searchHelper;
         }
 
-        public async Task<(int totalCount, IEnumerable<ProductDto> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "", string brand = "", string type = "")
+        public async Task<(int totalCount, IEnumerable<ProductDto> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "", string[]? brand = null, string[]? type = null)
         {
             var query = _context.Products
                 .Include(p => p.Brand)
@@ -50,13 +50,14 @@ namespace backend.Repositories
                 query = _searchHelper.ApplyProductSearchFilter(query, search, searchColumn, searchType);
             }
 
-            if (!string.IsNullOrEmpty(brand))
+            if (brand != null && brand.Any())
             {
-                query = query.Where(p => p.Brand == brand);
+                query = query.Where(p => brand.Contains(p.Brand));
             }
-            if (!string.IsNullOrEmpty(type))
+
+            if (type != null && type.Any())
             {
-                query = query.Where(p => p.Type == type);
+                query = query.Where(p => type.Contains(p.Type));
             }
 
             var totalCount = await query.CountAsync();

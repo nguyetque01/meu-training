@@ -17,7 +17,7 @@ namespace backend.Controllers
             _responseHelper = responseHelper;
         }
 
-        // GET: /api/products?page=1&size=5&sort=id&dir=asc&search=p001&searchColumn=all&searchType=partial&brand=Medicos&type=Hygiene
+        // GET: /api/products?page=1&size=5&sort=id&dir=asc&search=P003&searchColumn=all&searchType=partial&brand=Xiaomi&brand=Naelofar&brand=Philips&type=Mobile%20Phones&type=Multi%20Colour%20Floral
         [HttpGet]
         public async Task<IActionResult> GetProducts(
             [FromQuery] int page = 1,
@@ -27,8 +27,8 @@ namespace backend.Controllers
             [FromQuery] string search = "",
             [FromQuery] string searchColumn = "all",
             [FromQuery] string searchType = "partial",
-            [FromQuery] string brand = "",
-            [FromQuery] string type = "")
+            [FromQuery] string[]? brand = null,
+            [FromQuery] string[]? type = null)
         {
             try
             {

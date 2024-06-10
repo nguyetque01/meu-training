@@ -24,8 +24,8 @@ const Product = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchColumn, setSearchColumn] = useState<string>("all");
   const [searchType, setSearchType] = useState<string>("partial");
-  const [selectedBrand, setSelectedBrand] = useState<string>("");
-  const [selectedType, setSelectedType] = useState<string>("");
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const [deleteProductCode, setDeleteProductCode] = useState<string>("");
 
@@ -40,8 +40,8 @@ const Product = () => {
         searchTerm,
         searchColumn,
         searchType,
-        selectedBrand,
-        selectedType
+        selectedBrands,
+        selectedTypes
       );
 
       if (!productData || !productData.items) {
@@ -62,8 +62,8 @@ const Product = () => {
     searchTerm,
     searchColumn,
     searchType,
-    selectedBrand,
-    selectedType,
+    selectedBrands,
+    selectedTypes,
   ]);
 
   const fetchBrands = useCallback(async () => {
@@ -159,9 +159,12 @@ const Product = () => {
     setPage(1);
   };
 
-  const handleFilterChange = (column: string, value: string) => {
-    column === "brand" && setSelectedBrand(value);
-    column === "type" && setSelectedType(value);
+  const handleFilterChange = (column: string, values: string[]) => {
+    if (column === "brand") {
+      setSelectedBrands(values);
+    } else if (column === "type") {
+      setSelectedTypes(values);
+    }
   };
 
   return (
@@ -212,8 +215,8 @@ const Product = () => {
             searchType={searchType}
             brandNames={brandNames}
             typeNames={typeNames}
-            selectedBrand={selectedBrand}
-            selectedType={selectedType}
+            selectedBrands={selectedBrands}
+            selectedTypes={selectedTypes}
             handleClickEditBtn={handleClickEditBtn}
             handleClickDeleteBtn={handleClickDeleteBtn}
             onChangePage={handleChangePage}
