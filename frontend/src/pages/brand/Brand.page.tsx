@@ -29,7 +29,7 @@ const Brand = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const [deleteBrandId, setDeleteBrandId] = useState<number>(0);
 
-  const fetchbrands = useCallback(async () => {
+  const fetchBrands = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -57,8 +57,8 @@ const Brand = () => {
   }, [page, pageSize, searchTerm, searchColumn, searchType]);
 
   useEffect(() => {
-    fetchbrands();
-  }, [fetchbrands]);
+    fetchBrands();
+  }, [fetchBrands, page]);
 
   const openForm = () => setIsFormOpen(true);
 
@@ -86,9 +86,13 @@ const Brand = () => {
   const deleteBrand = async () => {
     try {
       await BrandService.deleteBrand(deleteBrandId);
+      if (brands.length === 1 && page > 1) {
+        setPage(page - 1);
+      } else {
+        fetchBrands();
+      }
       closeDeleteDialog();
       toast.success("Brand deleted successfully!");
-      setPage(1);
     } catch (error) {
       console.error("Error deleting Brand:", error);
       toast.error("Error deleting Brand. Please try again.");
@@ -101,7 +105,7 @@ const Brand = () => {
     if (brandId === 0) {
       setbrandId(newbrandId);
     }
-    fetchbrands();
+    fetchBrands();
   };
 
   const handleClickCancelBtn = () => {
