@@ -1,11 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Paper, Typography } from "@mui/material";
 import { toast } from "react-toastify";
 import { IProductDto } from "../../types/product.tying";
 import ProductForm from "../../components/product/ProductForm.component";
@@ -34,6 +28,7 @@ const Product = () => {
   const [selectedType, setSelectedType] = useState<string>("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const [deleteProductCode, setDeleteProductCode] = useState<string>("");
+  const [isFiltering, setIsFiltering] = useState<boolean>(false);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -153,12 +148,14 @@ const Product = () => {
     setSearchColumn(searchColumn);
     setSearchType(searchType);
     setPage(1);
+    setIsFiltering(false);
   };
 
   const handleFilterChange = (column: string, value: string) => {
     column === "brand" && setSelectedBrand(value);
     column === "type" && setSelectedType(value);
     handleSearch(value, column, "exact");
+    setIsFiltering(true);
   };
 
   return (
@@ -197,34 +194,28 @@ const Product = () => {
           <Box sx={{ p: 2 }}>
             <SearchBox columns={productColumns} onSearch={handleSearch} />
           </Box>
-          {loading ? (
-            <Box sx={{ p: 2, textAlign: "center" }}>
-              <CircularProgress size={100} />
-            </Box>
-          ) : products?.length === 0 ? (
-            <Box sx={{ p: 2, textAlign: "center" }}>
-              <Typography variant="h5">Not found</Typography>
-            </Box>
-          ) : (
-            <ProductGrid
-              products={products}
-              page={page}
-              pageSize={pageSize}
-              totalProducts={totalProducts}
-              searchTerm={searchTerm}
-              searchColumn={searchColumn}
-              searchType={searchType}
-              brandNames={brandNames}
-              typeNames={typeNames}
-              selectedBrand={selectedBrand}
-              selectedType={selectedType}
-              handleClickEditBtn={handleClickEditBtn}
-              handleClickDeleteBtn={handleClickDeleteBtn}
-              onChangePage={handleChangePage}
-              onChangePageSize={handleChangePageSize}
-              onFilterChange={handleFilterChange}
-            />
-          )}
+
+          <ProductGrid
+            isLoading={loading}
+            products={products}
+            page={page}
+            pageSize={pageSize}
+            totalProducts={totalProducts}
+            searchTerm={searchTerm}
+            searchColumn={searchColumn}
+            searchType={searchType}
+            brandNames={brandNames}
+            typeNames={typeNames}
+            selectedBrand={selectedBrand}
+            selectedType={selectedType}
+            isFiltering={isFiltering}
+            handleClickEditBtn={handleClickEditBtn}
+            handleClickDeleteBtn={handleClickDeleteBtn}
+            onChangePage={handleChangePage}
+            onChangePageSize={handleChangePageSize}
+            onFilterChange={handleFilterChange}
+          />
+
           <DeleteDialog
             item={"product"}
             isOpen={isDeleteDialogOpen}
