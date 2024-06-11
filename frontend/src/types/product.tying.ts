@@ -1,3 +1,6 @@
+import { IBrand } from "./brand.tying";
+import { IType } from "./type.tying";
+
 export interface IProduct {
   id: number;
   code: string;
@@ -13,8 +16,8 @@ export interface IProductDto {
   code: string;
   name: string;
   category: string;
-  brand?: string;
-  type?: string;
+  brand?: IBrand;
+  type?: IType;
   description?: string;
   searchMatches: {
     id?: number[];

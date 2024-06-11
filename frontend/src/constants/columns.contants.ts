@@ -8,4 +8,12 @@ export const productColumns: string[] = [
   "description",
 ];
 
+export const productSearchColumns: string[] = [
+  "id",
+  "code",
+  "name",
+  "category",
+  "description",
+];
+
 export const brandColumns = ["id", "name"];

@@ -13,8 +13,8 @@ const ProductService = {
     search: string = "",
     searchColumn: string = "all",
     searchType: string = "partial",
-    brand: string[] = [],
-    type: string[] = []
+    brandId: number[] = [],
+    typeId: number[] = []
   ): Promise<{ items: IProductDto[]; totalCount: number }> => {
     try {
       let endpoint = `${API_ENDPOINT}?page=${page}&size=${size}&sort=${sort}&dir=${dir}`;
@@ -22,14 +22,16 @@ const ProductService = {
         endpoint += `&search=${search}&searchColumn=${searchColumn}&searchType=${searchType}`;
       }
 
-      if (brand.length > 0) {
-        endpoint += brand
-          .map((b) => `&brand=${encodeURIComponent(b)}`)
+      if (brandId.length > 0) {
+        endpoint += brandId
+          .map((b) => `&brandId=${encodeURIComponent(b.toString())}`)
           .join("");
       }
 
-      if (type.length > 0) {
-        endpoint += type.map((t) => `&type=${encodeURIComponent(t)}`).join("");
+      if (typeId.length > 0) {
+        endpoint += typeId
+          .map((t) => `&typeId=${encodeURIComponent(t.toString())}`)
+          .join("");
       }
 
       const response = await httpModule.get<

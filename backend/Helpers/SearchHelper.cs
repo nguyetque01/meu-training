@@ -12,7 +12,7 @@ namespace backend.Helpers
     public class SearchHelper
     {
         private char[] punctuationMarks = { ' ', '-', ':', ',', '.', '?', '!' };
-        private List<string> productColumns = new List<string> { "id", "code", "name", "category", "brand", "type", "description" };
+        private List<string> productColumns = new List<string> { "id", "code", "name", "category", "description" };
         private List<string> brandColumns = new List<string> { "id", "name" };
 
         private bool IsAllColumnsSearch(string searchColumn)

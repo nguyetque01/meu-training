@@ -4,12 +4,14 @@ using backend.Models;
 using backend.Helpers;
 using System.Text.RegularExpressions;
 using backend.DTOs;
+using System.Drawing.Drawing2D;
+using System.Linq;
 
 namespace backend.Repositories
 {
     public interface IProductRepository
     {
-        Task<(int totalCount, IEnumerable<ProductDto> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "", string[]? brand = null, string[]? type = null);
+        Task<(int totalCount, IEnumerable<ProductDto> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "", int[]? brandId = null, int[]? typeId = null);
         Task<Product> GetProductByCodeAsync(string code);
         Task<ProductDto> GetProductDetailByCodeAsync(string code);
         Task<bool> AddProductAsync(Product product);
@@ -28,7 +30,7 @@ namespace backend.Repositories
             _searchHelper = searchHelper;
         }
 
-        public async Task<(int totalCount, IEnumerable<ProductDto> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "", string[]? brand = null, string[]? type = null)
+        public async Task<(int totalCount, IEnumerable<ProductDto> products)> GetProductsAsync(int page, int size, string sort, string dir, string search = "", string searchColumn = "", string searchType = "", int[]? brandId = null, int[]? typeId = null)
         {
             var query = _context.Products
                 .Include(p => p.Brand)
@@ -39,8 +41,8 @@ namespace backend.Repositories
                     Code = p.Code,
                     Name = p.Name,
                     Category = p.Category,
-                    Brand = p.Brand != null ? p.Brand.Name : "Null",
-                    Type = p.Type != null ? p.Type.Name : "Null",
+                    Brand = p.Brand != null ? new BrandDto { Id = p.Brand.Id, Name = p.Brand.Name } : null,
+                    Type = p.Type != null ? new TypeDto { Id = p.Type.Id, Name = p.Type.Name } : null,
                     Description = p.Description
                 })
                 .AsQueryable();
@@ -50,14 +52,14 @@ namespace backend.Repositories
                 query = _searchHelper.ApplyProductSearchFilter(query, search, searchColumn, searchType);
             }
 
-            if (brand != null && brand.Any())
+            if (brandId != null && brandId.Any())
             {
-                query = query.Where(p => brand.Contains(p.Brand));
+                query = query.Where(p => brandId.Contains(p.Brand.Id));
             }
 
-            if (type != null && type.Any())
+            if (typeId != null && typeId.Any())
             {
-                query = query.Where(p => type.Contains(p.Type));
+                query = query.Where(p => typeId.Contains(p.Type.Id));
             }
 
             var totalCount = await query.CountAsync();
@@ -96,8 +98,8 @@ namespace backend.Repositories
                     Code = p.Code,
                     Name = p.Name,
                     Category = p.Category,
-                    Brand = p.Brand != null ? p.Brand.Name : "Null",
-                    Type = p.Type != null ? p.Type.Name : "Null",
+                    Brand = p.Brand != null ? new BrandDto { Id = p.Brand.Id, Name = p.Brand.Name } : null,
+                    Type = p.Type != null ? new TypeDto { Id = p.Type.Id, Name = p.Type.Name } : null,
                     Description = p.Description
                 })
                 .FirstOrDefaultAsync(p => p.Code == code);
