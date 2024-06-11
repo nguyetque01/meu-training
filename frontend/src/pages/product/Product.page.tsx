@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Box, Button, Paper, Typography } from "@mui/material";
 import { toast } from "react-toastify";
 import { IProductDto } from "../../types/product.tying";
+import { IBrand } from "../../types/brand.tying";
+import { IType } from "../../types/type.tying";
 import ProductForm from "../../components/product/ProductForm.component";
 import ProductGrid from "../../components/product/ProductGrid.component";
 import ProductService from "../../services/ProductService";
@@ -13,8 +15,10 @@ import TypeService from "../../services/TypeService";
 
 const Product = () => {
   const [products, setProducts] = useState<IProductDto[]>([]);
-  const [brandNames, setBrandNames] = useState<string[]>([]);
-  const [typeNames, setTypeNames] = useState<string[]>([]);
+  const [brands, setBrands] = useState<IBrand[]>([]);
+  const [types, setTypes] = useState<IType[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<IBrand[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<IType[]>([]);
   const [productCode, setProductCode] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
@@ -24,12 +28,12 @@ const Product = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchColumn, setSearchColumn] = useState<string>("all");
   const [searchType, setSearchType] = useState<string>("partial");
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const [deleteProductCode, setDeleteProductCode] = useState<string>("");
 
   const fetchProducts = useCallback(async () => {
+    const selectedBrandIds: number[] = selectedBrands.map((brand) => brand.id);
+    const selectedTypeIds: number[] = selectedTypes.map((type) => type.id);
     try {
       setLoading(true);
       const productData = await ProductService.getAllProducts(
@@ -40,10 +44,9 @@ const Product = () => {
         searchTerm,
         searchColumn,
         searchType,
-        selectedBrands,
-        selectedTypes
+        selectedBrandIds,
+        selectedTypeIds
       );
-
       if (!productData || !productData.items) {
         console.error("Product data or items is undefined");
       } else {
@@ -69,7 +72,7 @@ const Product = () => {
   const fetchBrands = useCallback(async () => {
     try {
       const brandData = await BrandService.getAllBrands();
-      setBrandNames(brandData.map((brand) => brand.name));
+      setBrands(brandData);
     } catch (error) {
       console.error("Error fetching brands", error);
       toast.error("Error fetching brands");
@@ -79,7 +82,7 @@ const Product = () => {
   const fetchTypes = useCallback(async () => {
     try {
       const typeData = await TypeService.getAllTypes();
-      setTypeNames(typeData.map((type) => type.name));
+      setTypes(typeData);
     } catch (error) {
       console.error("Error fetching types", error);
       toast.error("Error fetching types");
@@ -163,12 +166,12 @@ const Product = () => {
     setPage(1);
   };
 
-  const handleFilterChange = (column: string, values: string[]) => {
-    if (column === "brand") {
-      setSelectedBrands(values);
-    } else if (column === "type") {
-      setSelectedTypes(values);
-    }
+  const handleSelectBrands = (brands: IBrand[]) => {
+    setSelectedBrands(brands);
+  };
+
+  const handleSelectTypes = (types: IType[]) => {
+    setSelectedTypes(types);
   };
 
   return (
@@ -210,21 +213,22 @@ const Product = () => {
           <ProductGrid
             isLoading={loading}
             products={products}
+            brands={brands}
+            types={types}
             page={page}
             pageSize={pageSize}
             totalProducts={totalProducts}
             searchTerm={searchTerm}
             searchColumn={searchColumn}
             searchType={searchType}
-            brandNames={brandNames}
-            typeNames={typeNames}
             selectedBrands={selectedBrands}
             selectedTypes={selectedTypes}
             handleClickEditBtn={handleClickEditBtn}
             handleClickDeleteBtn={handleClickDeleteBtn}
             onChangePage={handleChangePage}
             onChangePageSize={handleChangePageSize}
-            onFilterChange={handleFilterChange}
+            onSelectBrands={handleSelectBrands}
+            onSelectTypes={handleSelectTypes}
           />
           <DeleteDialog
             item={"product"}

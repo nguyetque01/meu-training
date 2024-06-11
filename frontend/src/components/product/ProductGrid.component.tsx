@@ -14,6 +14,8 @@ import {
   TablePagination,
 } from "@mui/material";
 import { IProductDto } from "../../types/product.tying";
+import { IBrand } from "../../types/brand.tying";
+import { IType } from "../../types/type.tying";
 import { highlightText, shouldHighlight } from "../../utils/highlight.utils";
 import { capitalizeFirstLetter } from "../../utils/string.utils";
 import { productColumns } from "../../constants/columns.contants";
@@ -22,21 +24,22 @@ import Filter from "../filter/Filter.component";
 interface ProductGridProps {
   isLoading: boolean;
   products: IProductDto[];
+  brands: IBrand[];
+  types: IType[];
   page: number;
   pageSize: number;
   totalProducts: number;
   searchTerm: string;
   searchColumn: string;
   searchType: string;
-  brandNames: string[];
-  typeNames: string[];
-  selectedBrands: string[];
-  selectedTypes: string[];
+  selectedBrands: IBrand[];
+  selectedTypes: IType[];
   handleClickEditBtn: (code: string) => void;
   handleClickDeleteBtn: (code: string) => void;
   onChangePage: (newPage: number) => void;
   onChangePageSize: (newPageSize: number) => void;
-  onFilterChange: (column: string, values: string[]) => void;
+  onSelectBrands: (brands: IBrand[]) => void;
+  onSelectTypes: (types: IType[]) => void;
 }
 
 const calculateCellWidth = (field: keyof IProductDto): number => {
@@ -54,11 +57,12 @@ const calculateCellWidth = (field: keyof IProductDto): number => {
 
 const renderTableHeaderCells = (
   column: string,
-  brandNames: string[],
-  typeNames: string[],
-  selectedBrands: string[],
-  selectedTypes: string[],
-  onFilterChange: (column: string, values: string[]) => void
+  brands: IBrand[],
+  types: IType[],
+  selectedBrands: IBrand[],
+  selectedTypes: IType[],
+  onSelectBrands: (brands: IBrand[]) => void,
+  onSelectTypes: (types: IType[]) => void
 ) => {
   return (
     <TableCell
@@ -68,13 +72,19 @@ const renderTableHeaderCells = (
         width: calculateCellWidth(column as keyof IProductDto),
       }}
     >
-      {column === "brand" || column === "type" ? (
-        <Filter
-          label={capitalizeFirstLetter(column)}
-          columnName={column}
-          allValues={column === "brand" ? brandNames : typeNames}
-          selectedValues={column === "brand" ? selectedBrands : selectedTypes}
-          onChange={onFilterChange}
+      {column === "brand" ? (
+        <Filter<IBrand>
+          label={capitalizeFirstLetter("brand")}
+          allValues={brands}
+          selectedValues={selectedBrands}
+          onChange={onSelectBrands}
+        />
+      ) : column === "type" ? (
+        <Filter<IType>
+          label={capitalizeFirstLetter("type")}
+          allValues={types}
+          selectedValues={selectedTypes}
+          onChange={onSelectTypes}
         />
       ) : (
         capitalizeFirstLetter(column)
@@ -90,7 +100,12 @@ const renderTableCell = (
   searchType: string,
   searchColumn: string
 ) => {
-  const productField = product[field];
+  let productField;
+  if (field === "brand" || field === "type") {
+    productField = product[field]?.name;
+  } else {
+    productField = product[field];
+  }
   const matchField =
     product.searchMatches[field as keyof IProductDto["searchMatches"]];
 
@@ -118,15 +133,16 @@ const ProductGrid = ({
   searchTerm,
   searchColumn,
   searchType,
-  brandNames,
-  typeNames,
+  brands,
+  types,
   selectedBrands,
   selectedTypes,
   handleClickEditBtn,
   handleClickDeleteBtn,
   onChangePage,
   onChangePageSize,
-  onFilterChange,
+  onSelectBrands,
+  onSelectTypes,
 }: ProductGridProps) => {
   const handleChangePage = (event: unknown, newPage: number) => {
     onChangePage(newPage + 1);
@@ -148,11 +164,12 @@ const ProductGrid = ({
               {productColumns.map((column) =>
                 renderTableHeaderCells(
                   column,
-                  brandNames,
-                  typeNames,
+                  brands,
+                  types,
                   selectedBrands,
                   selectedTypes,
-                  onFilterChange
+                  onSelectBrands,
+                  onSelectTypes
                 )
               )}
               <TableCell sx={{ fontSize: 16, width: 150 }}>Actions</TableCell>

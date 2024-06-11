@@ -1,48 +1,35 @@
 import React from "react";
-import { FormControl, TextField, Checkbox, Autocomplete } from "@mui/material";
+import { Autocomplete, TextField } from "@mui/material";
 
-interface FilterProps {
+type FilterProps<T> = {
   label: string;
-  columnName: string;
-  allValues: string[];
-  selectedValues: string[];
-  onChange: (columnName: string, values: string[]) => void;
-}
+  allValues: T[];
+  selectedValues: T[];
+  onChange: (values: T[]) => void;
+};
 
-const Filter: React.FC<FilterProps> = ({
+const Filter = <T extends { id: number; name?: string; typeName?: string }>({
   label,
-  columnName,
   allValues,
   selectedValues,
   onChange,
-}) => {
-  const handleChange = (event: React.SyntheticEvent, newValue: string[]) => {
-    onChange(columnName, newValue);
+}: FilterProps<T>) => {
+  const handleChange = (event: React.SyntheticEvent, value: T[]) => {
+    onChange(value);
   };
 
   return (
-    <FormControl sx={{ width: 250 }}>
+    <div>
       <Autocomplete
         multiple
         options={allValues}
+        getOptionLabel={(option) => option.name || option.typeName || ""}
         value={selectedValues}
+        isOptionEqualToValue={(option, value) => option.id === value.id}
         onChange={handleChange}
-        disableCloseOnSelect
-        renderOption={(props, option, { selected }) => (
-          <li {...props}>
-            <Checkbox style={{ marginRight: 8 }} checked={selected} />
-            {option}
-          </li>
-        )}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={label}
-            placeholder={`Select ${label}`}
-          />
-        )}
+        renderInput={(params) => <TextField {...params} label={label} />}
       />
-    </FormControl>
+    </div>
   );
 };
 
