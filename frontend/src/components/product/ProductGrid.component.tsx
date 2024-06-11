@@ -39,6 +39,50 @@ interface ProductGridProps {
   onFilterChange: (column: string, values: string[]) => void;
 }
 
+const calculateCellWidth = (field: keyof IProductDto): number => {
+  switch (field) {
+    case "name":
+    case "description":
+      return 200;
+    case "code":
+    case "id":
+      return 50;
+    default:
+      return 150;
+  }
+};
+
+const renderTableHeaderCells = (
+  column: string,
+  brandNames: string[],
+  typeNames: string[],
+  selectedBrands: string[],
+  selectedTypes: string[],
+  onFilterChange: (column: string, values: string[]) => void
+) => {
+  return (
+    <TableCell
+      key={column}
+      sx={{
+        fontSize: 16,
+        width: calculateCellWidth(column as keyof IProductDto),
+      }}
+    >
+      {column === "brand" || column === "type" ? (
+        <Filter
+          label={capitalizeFirstLetter(column)}
+          columnName={column}
+          allValues={column === "brand" ? brandNames : typeNames}
+          selectedValues={column === "brand" ? selectedBrands : selectedTypes}
+          onChange={onFilterChange}
+        />
+      ) : (
+        capitalizeFirstLetter(column)
+      )}
+    </TableCell>
+  );
+};
+
 const renderTableCell = (
   product: IProductDto,
   field: keyof IProductDto,
@@ -51,7 +95,7 @@ const renderTableCell = (
     product.searchMatches[field as keyof IProductDto["searchMatches"]];
 
   return (
-    <TableCell key={field} sx={{ width: field === "name" ? 200 : 150 }}>
+    <TableCell key={field} sx={{ width: calculateCellWidth(field) }}>
       {productField &&
         (shouldHighlight(product, field as string, searchColumn) && matchField
           ? highlightText(
@@ -101,26 +145,16 @@ const ProductGrid = ({
         <Table>
           <TableHead>
             <TableRow>
-              {productColumns.map((column) => (
-                <TableCell
-                  key={column}
-                  sx={{ fontSize: 16, width: column === "name" ? 200 : 150 }}
-                >
-                  {column === "brand" || column === "type" ? (
-                    <Filter
-                      label={capitalizeFirstLetter(column)}
-                      columnName={column}
-                      allValues={column === "brand" ? brandNames : typeNames}
-                      selectedValues={
-                        column === "brand" ? selectedBrands : selectedTypes
-                      }
-                      onChange={onFilterChange}
-                    />
-                  ) : (
-                    capitalizeFirstLetter(column)
-                  )}
-                </TableCell>
-              ))}
+              {productColumns.map((column) =>
+                renderTableHeaderCells(
+                  column,
+                  brandNames,
+                  typeNames,
+                  selectedBrands,
+                  selectedTypes,
+                  onFilterChange
+                )
+              )}
               <TableCell sx={{ fontSize: 16, width: 150 }}>Actions</TableCell>
             </TableRow>
           </TableHead>

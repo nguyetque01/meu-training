@@ -21,7 +21,7 @@ const Filter: React.FC<FilterProps> = ({
   };
 
   return (
-    <FormControl sx={{ width: 220 }}>
+    <FormControl sx={{ width: 250 }}>
       <Autocomplete
         multiple
         options={allValues}

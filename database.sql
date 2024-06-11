@@ -1,4 +1,5 @@
 USE master
+GO
 DROP DATABASE MeuTraining;
 GO
 
