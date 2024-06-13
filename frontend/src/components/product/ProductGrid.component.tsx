@@ -44,12 +44,13 @@ interface ProductGridProps {
 
 const calculateCellWidth = (field: keyof IProductDto): number => {
   switch (field) {
-    case "name":
-    case "description":
-      return 200;
     case "code":
     case "id":
       return 50;
+    case "name":
+      return 200;
+    case "description":
+      return 250;
     default:
       return 150;
   }
@@ -172,7 +173,7 @@ const ProductGrid = ({
                   onSelectTypes
                 )
               )}
-              <TableCell sx={{ fontSize: 16, width: 150 }}>Actions</TableCell>
+              <TableCell sx={{ fontSize: 16 }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           {!isLoading && products?.length !== 0 && (
@@ -189,12 +190,12 @@ const ProductGrid = ({
                         searchColumn
                       )
                     )}
-                    <TableCell sx={{ width: 150 }}>
+                    <TableCell width={100}>
                       <Box
                         sx={{
                           display: "flex",
                           alignItems: "center",
-                          justifyContent: "space-between",
+                          justifyContent: "flex-start",
                         }}
                       >
                         <Button
